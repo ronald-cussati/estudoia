@@ -1,0 +1,397 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#F4F6FB;
+  --card:#FFFFFF;
+  --ink:#161B33;
+  --ink-soft:#565C7C;
+  --line:#E2E5F2;
+  --indigo:#4C3FE0;
+  --indigo-soft:#EDEBFD;
+  --teal:#0E9C8E;
+  --teal-soft:#E3FBF6;
+  --amber:#F2A93B;
+  --amber-soft:#FEF3DE;
+  --ok:#15803D;
+  --ok-soft:#E8F8EE;
+  --bad:#DC2626;
+  --bad-soft:#FDEAEA;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+.qroot{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  padding:0;
+  min-height:100%;
+  line-height:1.5;
+}
+.qwrap{max-width:760px;margin:0 auto;padding:28px 18px 60px;}
+
+/* ---------- HEADER ---------- */
+.qhead{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:22px;flex-wrap:wrap;
+}
+.qhead h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:26px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;
+}
+.qhead p{margin:0;color:var(--ink-soft);font-size:14px;}
+.qnet{flex-shrink:0;}
+
+/* ---------- TABS ---------- */
+.qtabs{display:flex;gap:8px;margin-bottom:20px;background:var(--card);padding:5px;border-radius:14px;border:1px solid var(--line);}
+.qtab{
+  flex:1;text-align:center;padding:11px 10px;border-radius:10px;border:none;background:transparent;
+  font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;color:var(--ink-soft);cursor:pointer;
+  transition:all .15s ease;
+}
+.qtab.active{background:var(--indigo);color:#fff;box-shadow:0 4px 10px -4px rgba(76,63,224,.5);}
+.qtab:not(.active):hover{background:var(--indigo-soft);color:var(--indigo);}
+
+/* ---------- INTRO SCREEN ---------- */
+.qintro{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;text-align:center;}
+.qintro h2{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:0 0 8px;}
+.qintro p{color:var(--ink-soft);font-size:14.5px;margin:0 0 20px;}
+.qstart{
+  background:var(--indigo);color:#fff;border:none;border-radius:11px;padding:13px 26px;
+  font-family:'Inter',sans-serif;font-weight:700;font-size:14.5px;cursor:pointer;
+}
+.qstart:hover{background:#3e33c4;}
+.qmeta{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.qbadge{background:var(--indigo-soft);color:var(--indigo);font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;}
+
+/* ---------- PROGRESS ---------- */
+.qprogress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13px;color:var(--ink-soft);font-weight:600;}
+.qbar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:18px;}
+.qbar-fill{height:100%;background:var(--indigo);border-radius:6px;transition:width .3s ease;}
+
+/* ---------- QUESTION CARD ---------- */
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+.qtopic{display:inline-block;background:var(--teal-soft);color:var(--teal);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:5px 11px;border-radius:20px;margin-bottom:14px;}
+.qtext{font-size:16px;font-weight:600;margin:0 0 18px;white-space:pre-line;}
+.qoptions{display:flex;flex-direction:column;gap:9px;}
+.qopt{
+  text-align:left;padding:13px 15px;border:1.5px solid var(--line);border-radius:11px;background:#fff;
+  font-family:'Inter',sans-serif;font-size:14.5px;color:var(--ink);cursor:pointer;transition:all .12s ease;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.qopt:hover:not(.disabled){border-color:var(--indigo);background:var(--indigo-soft);}
+.qopt .ql{font-weight:700;color:var(--ink-soft);flex-shrink:0;}
+.qopt.correct{border-color:var(--ok);background:var(--ok-soft);}
+.qopt.correct .ql{color:var(--ok);}
+.qopt.wrong{border-color:var(--bad);background:var(--bad-soft);}
+.qopt.wrong .ql{color:var(--bad);}
+.qopt.disabled{cursor:default;}
+
+.qexp{margin-top:16px;padding:14px 16px;border-radius:11px;font-size:13.5px;line-height:1.55;display:none;}
+.qexp.show{display:block;}
+.qexp.ok{background:var(--ok-soft);color:#0F5132;}
+.qexp.bad{background:var(--bad-soft);color:#7A1212;}
+.qexp b{display:block;margin-bottom:3px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;opacity:.8;}
+
+.qnextrow{display:flex;justify-content:flex-end;margin-top:18px;}
+.qnext{background:var(--indigo);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;display:none;font-family:'Inter',sans-serif;}
+.qnext.show{display:inline-block;}
+.qnext:hover{background:#3e33c4;}
+
+/* ---------- DISCURSIVA ---------- */
+.qdisc-area{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;resize:vertical;margin-bottom:12px;}
+.qdisc-area:focus{outline:none;border-color:var(--indigo);}
+.qreveal{background:var(--amber-soft);color:#8A5A00;border:1.5px dashed var(--amber);border-radius:10px;padding:11px 16px;font-weight:700;font-size:13.5px;cursor:pointer;width:100%;text-align:center;}
+.qreveal:hover{background:#fdecc4;}
+.qgabarito{display:none;margin-top:14px;padding:16px;border-radius:11px;background:var(--teal-soft);font-size:14px;line-height:1.6;color:#0a4f47;}
+.qgabarito.show{display:block;}
+.qgabarito b{display:block;margin-bottom:6px;color:var(--teal);font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;}
+
+/* ---------- RESULT SCREEN ---------- */
+.qresult{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px 26px;text-align:center;}
+.qresult .qscore{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;color:var(--indigo);margin:6px 0;}
+.qresult h2{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:0;}
+.qresult p{color:var(--ink-soft);font-size:14px;}
+.qresult-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+.qredo{background:var(--indigo);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;}
+.qredo.alt{background:#fff;color:var(--indigo);border:1.5px solid var(--indigo);}
+.qredo:hover{opacity:.88;}
+.qweak{text-align:left;margin-top:22px;border-top:1px solid var(--line);padding-top:18px;}
+.qweak h3{font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);margin:0 0 10px;}
+.qweak-item{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px;border-bottom:1px solid var(--line);}
+.qweak-item:last-child{border:none;}
+.qweak-tag{color:var(--ink-soft);}
+.qweak-val{font-weight:700;}
+.qweak-val.bad{color:var(--bad);}
+.qweak-val.ok{color:var(--ok);}
+
+@media(max-width:480px){
+  .qhead{flex-direction:column;align-items:flex-start;}
+  .qnet{align-self:flex-end;}
+  .qtext{font-size:15px;}
+}
+</style>
+
+<div class="qroot">
+<div class="qwrap">
+
+  <div class="qhead">
+    <div>
+      <h1>Inteligência Artificial — Revisão Final</h1>
+      <p>Banco de fixação + simulado no formato da prova (8 objetivas · 2 discursivas)</p>
+    </div>
+    <svg class="qnet" width="92" height="64" viewBox="0 0 92 64" fill="none">
+      <g stroke="#C9CBE8" stroke-width="1.3">
+        <line x1="14" y1="12" x2="46" y2="14"/><line x1="14" y1="12" x2="46" y2="32"/><line x1="14" y1="12" x2="46" y2="50"/>
+        <line x1="14" y1="32" x2="46" y2="14"/><line x1="14" y1="32" x2="46" y2="32"/><line x1="14" y1="32" x2="46" y2="50"/>
+        <line x1="14" y1="52" x2="46" y2="14"/><line x1="14" y1="52" x2="46" y2="32"/><line x1="14" y1="52" x2="46" y2="50"/>
+        <line x1="46" y1="14" x2="78" y2="22"/><line x1="46" y1="32" x2="78" y2="22"/><line x1="46" y1="50" x2="78" y2="22"/>
+        <line x1="46" y1="14" x2="78" y2="44"/><line x1="46" y1="32" x2="78" y2="44"/><line x1="46" y1="50" x2="78" y2="44"/>
+      </g>
+      <circle cx="14" cy="12" r="5" fill="#4C3FE0"/><circle cx="14" cy="32" r="5" fill="#4C3FE0"/><circle cx="14" cy="52" r="5" fill="#4C3FE0"/>
+      <circle cx="46" cy="14" r="4.5" fill="#0E9C8E"/><circle cx="46" cy="32" r="4.5" fill="#0E9C8E"/><circle cx="46" cy="50" r="4.5" fill="#0E9C8E"/>
+      <circle cx="78" cy="22" r="5" fill="#F2A93B"/><circle cx="78" cy="44" r="5" fill="#F2A93B"/>
+    </svg>
+  </div>
+
+  <div class="qtabs">
+    <button class="qtab active" data-mode="review">🔁 Banco de Revisão</button>
+    <button class="qtab" data-mode="exam">📝 Simulado da Prova</button>
+  </div>
+
+  <div id="qstage"></div>
+
+</div>
+</div>
+
+<script>
+(function(){
+
+// ===================== BANCO DE REVISÃO (fixação) =====================
+const reviewBank = [
+{topic:"Leis da Robótica", q:"Qual lei, introduzida posteriormente por Asimov, tem prioridade sobre as outras três e impede que um robô cause dano à humanidade como um todo?", options:["Primeira Lei","Segunda Lei","Terceira Lei","Lei Zero"], correct:3, exp:"A Lei Zero diz que um robô não pode causar dano à humanidade, nem permitir por omissão que ela sofra dano — e tem prioridade sobre as três leis anteriores."},
+{topic:"Leis da Robótica", q:"A Segunda Lei da Robótica obriga o robô a obedecer ordens humanas, EXCETO quando:", options:["A ordem for tecnicamente complexa","A ordem entrar em conflito com a Primeira Lei","A ordem vier de uma criança","Não há exceção, obediência é absoluta"], correct:1, exp:"A Segunda Lei é subordinada à Primeira: obedecer, a não ser que isso fira um ser humano."},
+{topic:"Turing", q:"O artigo de Alan Turing que discute a construção de máquinas inteligentes e propõe um teste para avaliar sua \"inteligência\" se chama:", options:["\"Computing Machinery and Intelligence\"","\"On the Origin of Machines\"","\"Artificial Minds\"","\"The Imitation Test\""], correct:0, exp:"Publicado por Turing, é o artigo fundador da discussão sobre máquinas pensantes."},
+{topic:"Turing", q:"No Teste de Turing, o objetivo central é que:", options:["Um computador resolva equações mais rápido que um humano","Um juiz humano não consiga distinguir, pela conversa, se está falando com um humano ou uma máquina","Uma máquina vença um campeão de xadrez","Um robô realize tarefas físicas como um humano"], correct:1, exp:"É um teste comportamental/linguístico, não de velocidade ou força física."},
+{topic:"Definição de IA", q:"Segundo as definições vistas em aula, a Inteligência Artificial é descrita fundamentalmente como um campo que busca:", options:["Substituir totalmente o trabalho humano","Criar sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana (aprender, raciocinar, decidir, resolver problemas)","Apenas armazenar grandes volumes de dados","Automatizar exclusivamente tarefas físicas"], correct:1, exp:"Todas as definições citadas (Carraro, Lima, Silva et al.) convergem para isso."},
+{topic:"Sistema de Voz", q:"Dispositivos como Google Home, Amazon Echo e Apple HomePod são citados em aula como exemplo de:", options:["Redes Neurais Convolucionais","Sistemas de voz / assistentes baseados em IA no cotidiano","Modelos de N-grama","AutoEncoders"], correct:1, exp:"São exemplos de IA aplicada ao dia a dia via comando de voz."},
+{topic:"Tipos de IA (ANI/AGI/ASI)", q:"A IA projetada para executar apenas uma tarefa específica, sem capacidade de generalizar para outras áreas, é chamada de:", options:["AGI","ASI","ANI","IA Autoconsciente"], correct:2, exp:"ANI = Artificial Narrow Intelligence — IA estreita, focada em uma tarefa."},
+{topic:"Tipos de IA (ANI/AGI/ASI)", q:"A Superinteligência Artificial (ASI) se diferencia da AGI porque:", options:["ASI é mais limitada que a AGI","ASI ultrapassaria a inteligência humana em todos os sentidos, enquanto a AGI apenas a igualaria","ASI só existe em ficção e nunca foi discutida academicamente","Não há diferença real entre ASI e AGI"], correct:1, exp:"AGI = nível humano. ASI = muito além do nível humano, em todos os campos."},
+{topic:"Classificação de Hintz", q:"A classificação de IA por funcionalidade (Reativa, Memória Limitada, Teoria da Mente, Autoconsciente) foi proposta por:", options:["Alan Turing","John McCarthy","Arend Hintz","Yoshua Bengio"], correct:2, exp:"Arend Hintz, professor de Genética, Biologia Evolutiva e Machine Learning."},
+{topic:"Máquina Reativa", q:"O Deep Blue, que venceu Garry Kasparov no xadrez, é o exemplo clássico de:", options:["IA com Teoria da Mente","Máquina Reativa","IA Autoconsciente","IA de Memória Limitada"], correct:1, exp:"Calculava jogadas mas não aprendia com erros passados nem adaptava estratégia em tempo real — sem memória."},
+{topic:"Máquina Reativa", q:"Uma característica essencial de uma Máquina Reativa é que:", options:["Ela melhora sua acurácia com o tempo","Uma mesma entrada sempre produz a mesma saída, sem considerar experiências passadas","Ela compreende emoções de outros agentes","Ela tem consciência de si mesma"], correct:1, exp:"Não há memória nem aprendizado — é puramente determinística e estática."},
+{topic:"Memória Limitada", q:"Carros autônomos que usam a velocidade e distância de outros veículos para decidir uma manobra são exemplo de IA de:", options:["Memória Limitada","Máquina Reativa","Teoria da Mente","Autoconsciência"], correct:0, exp:"Usam dados recentes/passados (técnicas de Machine Learning) para decidir — por isso \"memória limitada\"."},
+{topic:"Teoria da Mente", q:"Na Psicologia, \"Teoria da Mente\" se refere à capacidade de:", options:["Resolver problemas matemáticos complexos","Atribuir estados mentais (crenças, desejos, emoções) a outras pessoas, sabendo que podem ser diferentes dos próprios","Memorizar grandes volumes de informação","Processar linguagem natural"], correct:1, exp:"Em humanos, desenvolve-se entre 3 e 4 anos, considerada completa por volta dos 5."},
+{topic:"IA Autoconsciente", q:"A IA Autoconsciente, no modelo de Hintz, seria a categoria mais avançada porque:", options:["Processa dados mais rápido que as demais","Além de compreender o mundo ao redor, teria consciência de si mesma","É a única capaz de aprender com dados","É a forma de IA mais comum atualmente"], correct:1, exp:"É um conceito hipotético — ainda não existe na prática."},
+{topic:"Chatbot vs Assistente", q:"A principal diferença entre um assistente virtual (Siri, Alexa) e um chatbot é que:", options:["Chatbots só funcionam por voz","Assistentes virtuais acionam funções em dispositivos e fazem pesquisas amplas; chatbots seguem diálogos pré-estabelecidos para contextos específicos (e-commerce, atendimento)","Chatbots têm AGI e assistentes não","Não há diferença prática entre os dois"], correct:1, exp:"Assistente = abrangência ampla de funções do dispositivo. Chatbot = diálogo roteirizado em um canal específico."},
+{topic:"Subáreas da IA / ML", q:"Qual das opções abaixo NÃO é citada nos slides como subárea da Inteligência Artificial?", options:["Processamento de Linguagem Natural (PLN)","Visão Computacional","Robótica","Contabilidade Gerencial"], correct:3, exp:"Subáreas vistas: Machine Learning, Deep Learning, PLN, Reconhecimento de Fala, Visão Computacional e Robótica."},
+{topic:"Deep Learning", q:"Para uma rede neural ser classificada como Deep Learning (Aprendizado Profundo), ela precisa ter:", options:["Apenas uma camada de entrada","3 ou mais camadas intermediárias (ocultas)","Nenhuma camada oculta","Exatamente 2 neurônios"], correct:1, exp:"É essa profundidade extra de camadas ocultas que dá nome ao \"Deep\" Learning."},
+{topic:"Tipos de Aprendizado", q:"Um sistema que classifica e-mails como \"spam\" ou \"não spam\" usando dados já rotulados é exemplo de:", options:["Aprendizado por Reforço","Aprendizado Não-Supervisionado","Aprendizado Supervisionado","Aprendizado por Inferência Pura"], correct:2, exp:"Dados rotulados (entrada + saída esperada) = características do Aprendizado Supervisionado."},
+{topic:"Tipos de Aprendizado", q:"A segmentação de clientes com base em padrões de comportamento de compra, sem rótulos prévios, é exemplo clássico de:", options:["Aprendizado Supervisionado","Aprendizado Não-Supervisionado","Aprendizado por Reforço","Deep Learning, obrigatoriamente"], correct:1, exp:"Sem rótulos, buscando padrões/agrupamentos escondidos nos dados — Não-Supervisionado."},
+{topic:"Tipos de Aprendizado", q:"Um modelo que interage com um ambiente e ajusta sua estratégia com base em recompensas e penalidades (jogos, controle de robôs) usa:", options:["Aprendizado Supervisionado","Aprendizado por Reforço","Aprendizado Não-Supervisionado","N-grama"], correct:1, exp:"Tentativa e erro guiado por recompensa/penalidade = Aprendizado por Reforço."},
+{topic:"Redes Neurais — Camadas", q:"Na arquitetura básica de uma rede neural artificial, a ordem correta das camadas é:", options:["Saída → Oculta → Entrada","Entrada → Oculta(s) → Saída","Oculta → Entrada → Saída","Apenas Entrada e Saída, sem camada oculta"], correct:1, exp:"Dado bruto entra, é processado nas camadas ocultas, e o resultado sai pela camada de saída."},
+{topic:"Tipos de Redes Neurais", q:"Redes que permitem \"loops\" — a saída de um nó pode voltar como entrada para ele mesmo, criando uma espécie de memória — são chamadas de:", options:["Redes Feedforward","Redes Neurais Recorrentes (RNN)","AutoEncoders","Redes Adversárias Generativas (GAN)"], correct:1, exp:"Essa \"memória\" via loop é o que torna as RNNs boas para sequências (texto, séries temporais)."},
+{topic:"Tipos de Redes Neurais", q:"Uma GAN (Rede Adversária Generativa) é composta por:", options:["Apenas uma rede que classifica imagens","Uma rede geradora e uma rede discriminadora competindo entre si","Um único neurônio com várias camadas","Uma árvore de decisão combinada com regressão linear"], correct:1, exp:"Gerador cria dados falsos; discriminador tenta distinguir os falsos dos reais — treinamento adversário."},
+{topic:"Transformers", q:"O mecanismo central da arquitetura Transformer, que permite ao modelo \"prestar mais atenção\" a certas palavras do que a outras, é chamado de:", options:["Convolução","Atenção (Attention)","Pooling","Backpropagation"], correct:1, exp:"Do artigo \"Attention is All You Need\" (Google) — base dos LLMs modernos."},
+{topic:"LLM", q:"Um Large Language Model (LLM) é definido nos slides como um modelo de IA treinado em:", options:["Pequenas amostras de dados estruturados","Grande quantidade de dados textuais, para gerar saídas de linguagem semelhantes à humana","Apenas imagens rotuladas","Regras gramaticais fixas, sem aprendizado estatístico"], correct:1, exp:"Exemplos citados: GPT, Gemini, Copilot, Llama, LaMDA."},
+{topic:"Eliza", q:"O ELIZA, considerado o primeiro chatbot da história, simulava uma conversa entre:", options:["Um professor e um aluno","Um paciente e seu psicólogo (terapeuta)","Um vendedor e um cliente","Dois robôs"], correct:1, exp:"O nome vem de Eliza Doolittle, da peça \"Pigmalião\" de George Bernard Shaw (1913)."},
+{topic:"Word Embeddings", q:"No conceito de Word Embedding, palavras com significados parecidos:", options:["São sempre escritas da mesma forma","Ficam representadas por vetores numéricos próximos no espaço geométrico","São automaticamente traduzidas para outro idioma","Não podem ser comparadas matematicamente"], correct:1, exp:"Quanto mais dimensões no vetor, melhor a representação da palavra e suas relações."},
+{topic:"N-grama", q:"A técnica de N-grama (N-gram) funciona medindo:", options:["O tamanho em bytes de um texto","A frequência com que uma palavra (ou grupo de N palavras) aparece, para prever a próxima com base nas anteriores","A quantidade de imagens em um documento","O número de camadas ocultas de uma rede neural"], correct:1, exp:"Técnica estatística anterior aos modelos neurais modernos de linguagem."},
+];
+
+// ===================== SIMULADO (8 objetivas + 2 discursivas) =====================
+const examObjective = [
+{topic:"ANI / AGI / ASI", q:"Sobre ANI, AGI e ASI, avalie as afirmativas:\nI. A ANI é a forma mais comum de IA atualmente, mas sua capacidade de aprendizado já permite a transição autônoma para uma AGI, sem necessidade de intervenção humana.\nII. A AGI representa um ponto de inflexão teórico em que a máquina seria capaz de realizar qualquer tarefa cognitiva humana, incluindo compreensão emocional e social — algo ainda não alcançado.\nIII. A ASI, conceito hipotético, teria capacidades que superariam a inteligência humana em todos os campos, levantando questões éticas sobre o controle dessas entidades.\n\nEstão corretas:", options:["Apenas I","Apenas I e II","Apenas II e III","I, II e III","Nenhuma das afirmativas"], correct:2, exp:"I é falsa: a ANI NÃO evolui sozinha para AGI — ela é limitada à tarefa para a qual foi treinada. II e III descrevem corretamente AGI e ASI."},
+{topic:"Classificação de Hintz", q:"A classificação de IA em \"Reativa\", \"Memória Limitada\", \"Teoria da Mente\" e \"Autoconsciente\" é um exemplo de classificação por:", options:["Capacidade (ANI/AGI/ASI)","Funcionalidade","Subárea de aplicação","Tipo de aprendizado"], correct:1, exp:"É a classificação de Arend Hintz, organizada por funcionalidade/capacidade comportamental crescente."},
+{topic:"Teste de Turing", q:"O Teste de Turing avalia fundamentalmente:", options:["A velocidade de processamento de uma máquina","A capacidade de uma máquina convencer um juiz humano de que é humana, através de conversa","A quantidade de dados que uma IA consegue armazenar","A precisão de cálculos matemáticos da máquina"], correct:1, exp:"É um critério comportamental/linguístico, não técnico ou de desempenho bruto."},
+{topic:"Memória Limitada (cenário)", q:"Um robô aspirador que decide seu trajeto usando o mapa da casa e a posição de móveis \"memorizada\" em limpezas anteriores é exemplo de IA classificada como:", options:["Máquina Reativa","Memória Limitada","Teoria da Mente","Autoconsciente"], correct:1, exp:"Usa dados/experiências passadas para melhorar decisões futuras — Memória Limitada."},
+{topic:"Tipos de Aprendizado (cenário)", q:"Um sistema que aprende jogando partidas contra si mesmo repetidamente, recebendo recompensa por vitórias e penalidade por derrotas, está usando:", options:["Aprendizado Supervisionado","Aprendizado Não-Supervisionado","Aprendizado por Reforço","Deep Learning, exclusivamente"], correct:2, exp:"Tentativa e erro com recompensa/penalidade é a definição de Aprendizado por Reforço."},
+{topic:"Redes Neurais", q:"Nas redes neurais artificiais, a camada responsável pela maior parte do processamento, funcionando como \"extratora de características\", é a:", options:["Camada de Entrada","Camada(s) Oculta(s) / Intermediária(s)","Camada de Saída","Camada de Atenção"], correct:1, exp:"A entrada apenas recebe os dados; a saída apresenta o resultado; o processamento pesado ocorre nas camadas ocultas."},
+{topic:"Transformers", q:"Os Transformers, base dos LLMs modernos como o ChatGPT, foram introduzidos em qual artigo científico?", options:["\"Computing Machinery and Intelligence\"","\"Attention is All You Need\"","\"Language Models are Few-Shot Learners\"","\"A Mathematical Theory of Communication\""], correct:1, exp:"Artigo do Google que introduziu o mecanismo de atenção como base da arquitetura Transformer."},
+{topic:"PLN / Modelos de Linguagem", q:"Sobre técnicas de linguagem e modelos de linguagem, avalie:\nI. O N-grama é uma técnica estatística que estima a próxima palavra com base na frequência de palavras anteriores.\nII. Word Embedding representa palavras como vetores numéricos, posicionando palavras de significado semelhante próximas no espaço vetorial.\nIII. O ELIZA, criado nos anos 1960, já utilizava arquitetura Transformer para gerar respostas.\n\nEstão corretas:", options:["Apenas I","Apenas I e II","Apenas II e III","I, II e III","Apenas III"], correct:1, exp:"III é falsa e anacrônica: o ELIZA (1966) usava casamento de padrões/regras simples — o Transformer só surgiu em 2017."},
+];
+
+const examDiscursive = [
+{topic:"Discursiva 1 — Teste de Turing", q:"Explique o conceito central do Teste de Turing proposto por Alan Turing e disserte sobre sua importância para os debates e a evolução do conceito de \"máquinas pensantes\".",
+ answer:"<b>O que a banca espera ver:</b> • Definição: um avaliador humano conversa, por texto, com dois interlocutores ocultos — um humano e uma máquina — sem saber qual é qual; se não conseguir distinguir consistentemente quem é a máquina, ela \"passa\" no teste.<br><br>• Origem: proposto por Alan Turing no artigo \"Computing Machinery and Intelligence\".<br><br>• Importância: desloca a pergunta filosófica abstrata (\"a máquina pensa de verdade?\") para um critério comportamental observável e testável (ela consegue imitar de forma convincente o comportamento linguístico humano?). Isso abriu décadas de debate sobre os limites entre simulação e cognição real, e segue relevante hoje — inclusive o próprio material da disciplina questiona se modelos como o ChatGPT \"passariam\" no teste."},
+{topic:"Discursiva 2 — Classificação de Hintz", q:"Apresente a classificação de Inteligência Artificial proposta por Arend Hintz, descrevendo cada uma das quatro categorias.",
+ answer:"<b>O que a banca espera ver — as 4 categorias, em ordem crescente de capacidade:</b><br><br>1. <b>Máquinas Reativas</b> — sem memória; não aprendem com o passado; mesma entrada sempre gera a mesma saída (ex: Deep Blue).<br><br>2. <b>IA de Memória Limitada</b> — aprende com dados e experiências passadas usando Machine Learning, melhorando a acurácia com o tempo (ex: carros autônomos, chatbots, assistentes virtuais).<br><br>3. <b>IA com Teoria da Mente</b> — categoria hipotética; compreenderia e levaria em conta pensamentos e emoções de outros indivíduos para definir seu próprio comportamento.<br><br>4. <b>IA Autoconsciente</b> — categoria mais avançada e também hipotética; além de compreender o mundo ao redor, teria consciência de si mesma, como os seres humanos."},
+];
+
+// ===================== STATE / RENDER =====================
+const stage = document.getElementById('qstage');
+let mode = 'review';
+let queue = [];
+let idx = 0;
+let score = 0;
+let answered = false;
+let weakByTopic = {};
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startIntro(){
+  const isReview = mode==='review';
+  stage.innerHTML = `
+    <div class="qintro">
+      <h2>${isReview ? '🔁 Banco de Revisão' : '📝 Simulado da Prova'}</h2>
+      <p>${isReview
+        ? 'Perguntas embaralhadas, cobrindo todos os tópicos da matéria. Use quantas vezes quiser para fixar — a ordem muda a cada rodada.'
+        : 'Mesma estrutura da prova real: 8 objetivas (0,5 cada) + 2 discursivas (1,5 cada). Responda como se fosse valendo.'}</p>
+      <button class="qstart" id="qstartbtn">Começar</button>
+      <div class="qmeta">
+        <span class="qbadge">${isReview ? reviewBank.length + ' questões' : '10 questões'}</span>
+        <span class="qbadge">${isReview ? 'Modo livre' : 'Formato oficial'}</span>
+      </div>
+    </div>`;
+  document.getElementById('qstartbtn').onclick = beginQuiz;
+}
+
+function beginQuiz(){
+  idx = 0; score = 0; answered = false; weakByTopic = {};
+  queue = mode==='review' ? shuffle(reviewBank) : examObjective.slice();
+  renderQuestion();
+}
+
+function renderProgress(total){
+  const isDisc = mode==='exam' && idx>=examObjective.length;
+  const current = isDisc ? examObjective.length + (idx-examObjective.length) + 1 : idx+1;
+  const pct = Math.round((idx/total)*100);
+  return `<div class="qprogress-row"><span>Questão ${current} de ${total}</span><span>${mode==='review' ? 'Acertos: '+score : ''}</span></div>
+  <div class="qbar"><div class="qbar-fill" style="width:${pct}%"></div></div>`;
+}
+
+function renderQuestion(){
+  answered = false;
+  const totalQ = mode==='review' ? queue.length : (examObjective.length + examDiscursive.length);
+
+  if(mode==='exam' && idx>=examObjective.length){
+    renderDiscursive(totalQ);
+    return;
+  }
+
+  const item = queue[idx];
+  stage.innerHTML = `
+    ${renderProgress(totalQ)}
+    <div class="qcard">
+      <span class="qtopic">${item.topic}</span>
+      <p class="qtext">${item.q}</p>
+      <div class="qoptions" id="qopts"></div>
+      <div class="qexp" id="qexp"></div>
+      <div class="qnextrow"><button class="qnext" id="qnextbtn">Próxima →</button></div>
+    </div>`;
+
+  const opts = document.getElementById('qopts');
+  const letters = ['A','B','C','D','E'];
+  item.options.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className='qopt';
+    btn.innerHTML = `<span class="ql">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = ()=>selectOption(i,item);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('qnextbtn').onclick = nextQuestion;
+}
+
+function selectOption(i,item){
+  if(answered) return;
+  answered = true;
+  const opts = document.querySelectorAll('#qopts .qopt');
+  opts.forEach((b,bi)=>{
+    b.classList.add('disabled');
+    if(bi===item.correct) b.classList.add('correct');
+    else if(bi===i) b.classList.add('wrong');
+  });
+  const isCorrect = i===item.correct;
+  if(isCorrect) score++;
+  weakByTopic[item.topic] = weakByTopic[item.topic] || {ok:0,total:0};
+  weakByTopic[item.topic].total++;
+  if(isCorrect) weakByTopic[item.topic].ok++;
+
+  const exp = document.getElementById('qexp');
+  exp.className = 'qexp show ' + (isCorrect?'ok':'bad');
+  exp.innerHTML = `<b>${isCorrect ? '✓ Correto' : '✗ Incorreto'}</b>${item.exp}`;
+  document.getElementById('qnextbtn').classList.add('show');
+}
+
+function renderDiscursive(totalQ){
+  const dIdx = idx - examObjective.length;
+  const item = examDiscursive[dIdx];
+  stage.innerHTML = `
+    ${renderProgress(totalQ)}
+    <div class="qcard">
+      <span class="qtopic">${item.topic}</span>
+      <p class="qtext">${item.q}</p>
+      <textarea class="qdisc-area" placeholder="Escreva sua resposta aqui (treino de redação)..."></textarea>
+      <button class="qreveal" id="qrevealbtn">Ver resposta esperada (gabarito)</button>
+      <div class="qgabarito" id="qgabarito">${item.answer}</div>
+      <div class="qnextrow"><button class="qnext show" id="qnextbtn">${dIdx===examDiscursive.length-1 ? 'Finalizar →' : 'Próxima →'}</button></div>
+    </div>`;
+  document.getElementById('qrevealbtn').onclick = ()=>{
+    document.getElementById('qgabarito').classList.add('show');
+  };
+  document.getElementById('qnextbtn').onclick = nextQuestion;
+}
+
+function nextQuestion(){
+  idx++;
+  const totalQ = mode==='review' ? queue.length : (examObjective.length + examDiscursive.length);
+  if(idx>=totalQ){
+    renderResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function renderResult(){
+  const totalObj = mode==='review' ? queue.length : examObjective.length;
+  const pct = Math.round((score/totalObj)*100);
+  let weakHtml = '';
+  Object.keys(weakByTopic).forEach(t=>{
+    const w = weakByTopic[t];
+    const ok = w.ok===w.total;
+    weakHtml += `<div class="qweak-item"><span class="qweak-tag">${t}</span><span class="qweak-val ${ok?'ok':'bad'}">${w.ok}/${w.total}</span></div>`;
+  });
+
+  stage.innerHTML = `
+    <div class="qresult">
+      <h2>${mode==='review' ? 'Rodada concluída' : 'Simulado concluído'}</h2>
+      <div class="qscore">${score}/${totalObj}</div>
+      <p>${mode==='exam' ? 'Objetivas certas · cada uma vale 0,5 pt na prova real (discursivas valem 1,5 cada — releia os gabaritos acima).' : pct+'% de acerto nesta rodada.'}</p>
+      <div class="qresult-actions">
+        <button class="qredo" id="qredobtn">Refazer (embaralhar)</button>
+        <button class="qredo alt" id="qswitchbtn">${mode==='review' ? 'Ir para o Simulado' : 'Ir para o Banco de Revisão'}</button>
+      </div>
+      <div class="qweak">
+        <h3>Desempenho por tópico</h3>
+        ${weakHtml}
+      </div>
+    </div>`;
+  document.getElementById('qredobtn').onclick = beginQuiz;
+  document.getElementById('qswitchbtn').onclick = ()=>{
+    mode = mode==='review' ? 'exam' : 'review';
+    document.querySelectorAll('.qtab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
+    startIntro();
+  };
+}
+
+// ===================== TABS =====================
+document.querySelectorAll('.qtab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.qtab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    mode = tab.dataset.mode;
+    startIntro();
+  });
+});
+
+startIntro();
+})();
+</script>
