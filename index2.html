@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 Simulado IA — Multivix 2026</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --s1: #58a6ff;
+    --s2: #bc8cff;
+    --s3: #3fb950;
+    --s4: #d29922;
+    --s5: #f85149;
+    --s6: #39d3bb;
+    --s7: #ffa657;
+    --correct: #238636;
+    --correct-bg: #0d2819;
+    --wrong: #da3633;
+    --wrong-bg: #2c1215;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 0;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .header-top h1 { font-size: 1.3rem; font-weight: 700; }
+  .badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.7rem; color: var(--muted); }
+  .header-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 16px; }
+  .tabs { display: flex; gap: 4px; }
+  .tab { padding: 8px 20px; border-radius: 8px 8px 0 0; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+  .tab.study { background: transparent; color: var(--muted); }
+  .tab.study.active { background: #1a2332; color: var(--s1); border-top: 2px solid var(--s1); }
+  .tab.quiz { background: transparent; color: var(--muted); }
+  .tab.quiz.active { background: #1a2820; color: var(--s3); border-top: 2px solid var(--s3); }
+  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+  /* MAIN */
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* STUDY SECTION */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; }
+  .section-header:hover { background: var(--surface2); }
+  .section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .section-label { font-size: 0.7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .section-title { font-size: 1rem; font-weight: 700; flex: 1; }
+  .section-count { font-size: 0.75rem; color: var(--muted); background: var(--surface2); padding: 2px 8px; border-radius: 10px; }
+  .chevron { font-size: 0.8rem; color: var(--muted); transition: transform .2s; }
+  .chevron.open { transform: rotate(90deg); }
+  .section-body { border-top: 1px solid var(--border); }
+
+  .topic { border-bottom: 1px solid var(--border); }
+  .topic:last-child { border-bottom: none; }
+  .topic-header { display: flex; align-items: center; gap: 10px; padding: 12px 20px; cursor: pointer; }
+  .topic-header:hover { background: var(--surface2); }
+  .topic-icon { font-size: 0.85rem; width: 20px; text-align: center; }
+  .topic-name { font-size: 0.9rem; font-weight: 600; flex: 1; }
+  .topic-chevron { font-size: 0.7rem; color: var(--muted); transition: transform .2s; }
+  .topic-chevron.open { transform: rotate(90deg); }
+  .topic-body { padding: 0 20px 14px 50px; display: none; }
+  .topic-body.open { display: block; }
+  .topic-item { padding: 5px 0 5px 14px; border-left: 2px solid var(--border); font-size: 0.85rem; line-height: 1.6; color: #c9d1d9; margin-bottom: 4px; }
+  .topic-item strong { color: var(--text); }
+
+  /* QUIZ SECTION */
+  .quiz-wrap { display: none; }
+  .quiz-wrap.active { display: block; }
+  .study-wrap { display: none; }
+  .study-wrap.active { display: block; }
+
+  .progress-bar-wrap { background: var(--surface2); border-radius: 4px; height: 6px; margin-bottom: 20px; }
+  .progress-bar-fill { height: 6px; border-radius: 4px; background: var(--s3); transition: width .4s; }
+
+  .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 16px; }
+  .quiz-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .quiz-num { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+  .quiz-slide-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .quiz-question { font-size: 1.05rem; font-weight: 600; line-height: 1.6; margin-bottom: 24px; color: var(--text); }
+  .quiz-type-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s; text-align: left; background: var(--surface2); color: var(--text); font-size: 0.9rem; line-height: 1.5; }
+  .option:hover:not(:disabled) { border-color: #58a6ff55; background: #1a2332; }
+  .option:disabled { cursor: default; }
+  .option.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .option.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+  .option-letter { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; background: var(--surface); }
+  .option.correct .option-letter { background: var(--correct); border-color: var(--correct); color: white; }
+  .option.wrong .option-letter { background: var(--wrong); border-color: var(--wrong); color: white; }
+
+  .explanation { margin-top: 20px; padding: 14px 16px; background: #0d2210; border: 1px solid #2ea04333; border-radius: 10px; font-size: 0.87rem; line-height: 1.6; color: #7ee787; }
+  .explanation .exp-label { font-weight: 700; margin-bottom: 4px; display: block; }
+
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .btn-next { background: var(--s3); color: #0d1117; border: none; padding: 10px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: opacity .2s; }
+  .btn-next:hover { opacity: 0.85; }
+  .btn-next:disabled { background: var(--surface2); color: var(--muted); cursor: default; }
+  .score-mini { font-size: 0.85rem; color: var(--muted); }
+
+  /* DONE SCREEN */
+  .done-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 28px; text-align: center; }
+  .done-score { font-size: 3.5rem; font-weight: 900; margin: 16px 0 8px; }
+  .done-label { font-size: 1rem; color: var(--muted); margin-bottom: 24px; }
+  .done-msg { font-size: 1.1rem; font-weight: 600; margin-bottom: 32px; }
+  .btn-retry { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 11px 32px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background .2s; }
+  .btn-retry:hover { background: var(--border); }
+
+  .answers-review { margin-top: 32px; text-align: left; }
+  .answers-review h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 12px; }
+  .rev-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+  .rev-item:last-child { border-bottom: none; }
+  .rev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .rev-dot.c { background: var(--correct); }
+  .rev-dot.w { background: var(--wrong); }
+
+  /* HINT DISCURSIVE */
+  .disc-card { background: #1a2332; border: 1px dashed #58a6ff44; border-radius: 10px; padding: 16px 18px; margin-top: 8px; font-size: 0.85rem; color: #79c0ff; line-height: 1.7; }
+  .disc-label { font-weight: 700; color: var(--s1); display: block; margin-bottom: 6px; }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 12px 0; }
+    main { padding: 16px 10px 60px; }
+    .quiz-card { padding: 20px 16px; }
+    .tab { padding: 8px 12px; font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span style="font-size:1.4rem">🤖</span>
+    <h1>Inteligência Artificial — Simulado</h1>
+    <span class="badge">Multivix · 2026/1</span>
+  </div>
+  <p class="header-sub">Prof. André Bessa da Silva · Slides 1–7 · Sistemas de Informação</p>
+  <div class="tabs">
+    <button class="tab study active" onclick="switchTab('study')">📚 Resumão</button>
+    <button class="tab quiz" onclick="switchTab('quiz')">⚡ Quiz Simulado (20 questões)</button>
+  </div>
+</header>
+
+<main>
+
+<!-- STUDY SECTION -->
+<div class="study-wrap active" id="studySection">
+
+  <!-- SLIDE 1 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s1')">
+      <div class="section-dot" style="background:#58a6ff"></div>
+      <div>
+        <div class="section-label" style="color:#58a6ff">Slide 1</div>
+        <div class="section-title">Fundamentos da IA</div>
+      </div>
+      <span class="section-count">6 tópicos</span>
+      <span class="chevron open" id="chevron-s1">▶</span>
+    </div>
+    <div class="section-body" id="body-s1">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1a')">
+          <span class="topic-icon">⚖️</span>
+          <span class="topic-name">As 4 Leis da Robótica (Asimov)</span>
+          <span class="topic-chevron" id="tc-t1a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1a">
+          <div class="topic-item"><strong>1ª Lei:</strong> Um robô não pode ferir um ser humano, nem permitir, por omissão, que sofra algum dano.</div>
+          <div class="topic-item"><strong>2ª Lei:</strong> Um robô deve obedecer às ordens humanas, exceto se conflitarem com a 1ª Lei.</div>
+          <div class="topic-item"><strong>3ª Lei:</strong> Um robô deve proteger sua própria existência, desde que não conflite com a 1ª ou 2ª Lei.</div>
+          <div class="topic-item"><strong>Lei Zero (introduzida depois):</strong> Um robô não pode causar dano à humanidade — tem <strong>prioridade sobre as três leis anteriores</strong>.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1b')">
+          <span class="topic-icon">🧮</span>
+          <span class="topic-name">Alan Turing e o Teste de Turing</span>
+          <span class="topic-chevron" id="tc-t1b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1b">
+          <div class="topic-item"><strong>Alan Turing:</strong> matemático e cientista da computação — um dos primeiros a discutir inteligência das máquinas.</div>
+          <div class="topic-item"><strong>Artigo:</strong> "Computing Machinery and Intelligence" — discute como construir e testar máquinas inteligentes.</div>
+          <div class="topic-item"><strong>Teste de Turing:</strong> Um juiz humano conversa por texto com um humano e uma máquina. Se o juiz não conseguir distinguir quem é quem, a máquina é considerada "inteligente".</div>
+          <div class="topic-item">Curiosidade: muitos na academia acreditam que o ChatGPT teria passado no Teste de Turing.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1c')">
+          <span class="topic-icon">🎓</span>
+          <span class="topic-name">John McCarthy — Origem do Termo "IA" (1956)</span>
+          <span class="topic-chevron" id="tc-t1c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1c">
+          <div class="topic-item"><strong>1956:</strong> John McCarthy (professor assistente do Dartmouth College) organizou a "Conferência de Pesquisa de Verão sobre IA de Dartmouth".</div>
+          <div class="topic-item">Foi nessa conferência que o termo <strong>"Inteligência Artificial"</strong> foi oficialmente cunhado.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1d')">
+          <span class="topic-icon">📖</span>
+          <span class="topic-name">Definição de IA (autores dos slides)</span>
+          <span class="topic-chevron" id="tc-t1d">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1d">
+          <div class="topic-item"><strong>CARRARO (2023):</strong> "Campo da Ciência da Computação que cria sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana — aprender, raciocinar, tomar decisões, resolver problemas."</div>
+          <div class="topic-item"><strong>LIMA (2014):</strong> Busca métodos computacionais com capacidades de: resolução de problemas, aquisição e representação de conhecimentos, reconhecimento de padrões, comunicação em linguagem coloquial, aprendizado.</div>
+          <div class="topic-item"><strong>Em resumo:</strong> IA simula inteligência humana — aprende, raciocina, resolve problemas, percebe o ambiente e compreende linguagem natural.</div>
+          <div class="topic-item">🚨 <strong>Discursiva provável:</strong> "Dentre os autores citados nos slides, apresente uma definição de IA" → mencione Carraro ou Lima pelo nome.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1e')">
+          <span class="topic-icon">🔺</span>
+          <span class="topic-name">ANI / AGI / ASI — Os 3 tipos de IA</span>
+          <span class="topic-chevron" id="tc-t1e">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1e">
+          <div class="topic-item"><strong>ANI — Artificial Narrow Intelligence (Estreita):</strong> É a IA que temos HOJE. Projetada para UMA tarefa específica. Opera sob restrições limitadas. Exemplos: Alexa, Netflix, reconhecimento facial, filtros faciais, veículos autônomos.</div>
+          <div class="topic-item"><strong>AGI — Artificial General Intelligence (Geral):</strong> HIPOTÉTICA. Teria inteligência similar à humana — aprenderia e se adaptaria de forma abrangente para resolver qualquer problema. Ainda não existe.</div>
+          <div class="topic-item"><strong>ASI — Artificial Super Intelligence (Superinteligência):</strong> HIPOTÉTICA. Ultrapassaria a inteligência humana em TODOS os sentidos (criatividade, emoções, relacionamentos, matemática, arte). Seria consciente de si mesma. Conceito teórico.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t1f')">
+          <span class="topic-icon">🗣️</span>
+          <span class="topic-name">Exemplos de IA no Cotidiano (voz, recomendação, predição)</span>
+          <span class="topic-chevron" id="tc-t1f">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t1f">
+          <div class="topic-item"><strong>Sistemas de Recomendação:</strong> Netflix — cada filme assistido, nota "gostei/não gostei" é usado pelo algoritmo de IA para recomendar conteúdo.</div>
+          <div class="topic-item"><strong>Sistemas de Predição:</strong> Amazon — ~35% das compras vêm de recomendações da IA (dados históricos + perfil demográfico).</div>
+          <div class="topic-item"><strong>Sistemas de Voz:</strong> Alexa (Amazon), Siri (Apple), Google Assistente, Cortana (Microsoft), Bixby (Samsung).</div>
+          <div class="topic-item"><strong>LLMs:</strong> GPT, Gemini, Copilot — redes neurais artificiais treinadas com grandes quantidades de texto.</div>
+          <div class="topic-item"><strong>GitHub Copilot:</strong> Ferramenta de IA para devs, integrada ao VS Code, JetBrains etc., desenvolvida pelo GitHub + OpenAI.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s2')">
+      <div class="section-dot" style="background:#bc8cff"></div>
+      <div>
+        <div class="section-label" style="color:#bc8cff">Slide 2</div>
+        <div class="section-title">Classificação de Hintz + ML/DL</div>
+      </div>
+      <span class="section-count">7 tópicos</span>
+      <span class="chevron" id="chevron-s2">▶</span>
+    </div>
+    <div class="section-body" id="body-s2" style="display:none">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2a')">
+          <span class="topic-icon">👤</span>
+          <span class="topic-name">Quem é Arend Hintz?</span>
+          <span class="topic-chevron" id="tc-t2a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2a">
+          <div class="topic-item">Professor de <strong>Genética, Biologia Evolutiva e Machine Learning</strong> na <strong>Dalarna University (Suécia)</strong>.</div>
+          <div class="topic-item">Propôs uma classificação das IAs <strong>por funcionalidade</strong> (4 categorias).</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2b')">
+          <span class="topic-icon">⚙️</span>
+          <span class="topic-name">1. Máquinas Reativas</span>
+          <span class="topic-chevron" id="tc-t2b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2b">
+          <div class="topic-item">Forma mais <strong>básica</strong> de IA.</div>
+          <div class="topic-item"><strong>NÃO tem memória.</strong> Não considera experiências passadas para ações futuras.</div>
+          <div class="topic-item">Mesma entrada → <strong>sempre mesma saída</strong>.</div>
+          <div class="topic-item"><strong>Exemplo clássico:</strong> Deep Blue (IBM) — calculava movimentos de xadrez mas não aprendia com erros de partidas anteriores.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2c')">
+          <span class="topic-icon">🧠</span>
+          <span class="topic-name">2. IA de Memória Limitada</span>
+          <span class="topic-chevron" id="tc-t2c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2c">
+          <div class="topic-item">Aprende com <strong>experiências passadas e dados novos</strong>.</div>
+          <div class="topic-item">Usa técnicas de <strong>Machine Learning</strong> para melhorar com o tempo.</div>
+          <div class="topic-item"><strong>Exemplos:</strong> Carros autônomos (lembram velocidade/distância de outros carros), chatbots e assistentes virtuais (memória curta de interações).</div>
+          <div class="topic-item"><strong>Assistentes:</strong> Google Assistente, Siri, Alexa, Cortana, Bixby.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2d')">
+          <span class="topic-icon">💭</span>
+          <span class="topic-name">3. IA com Teoria da Mente</span>
+          <span class="topic-chevron" id="tc-t2d">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2d">
+          <div class="topic-item"><strong>HIPOTÉTICA:</strong> compreenderia os pensamentos e emoções de outros para definir suas próprias ações.</div>
+          <div class="topic-item">Na Psicologia, "Teoria da Mente" = capacidade de entender que outros têm crenças/desejos diferentes dos seus. Em humanos, desenvolve-se entre 3 e 5 anos.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2e')">
+          <span class="topic-icon">🪞</span>
+          <span class="topic-name">4. IA Autoconsciente</span>
+          <span class="topic-chevron" id="tc-t2e">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2e">
+          <div class="topic-item"><strong>HIPOTÉTICA:</strong> nível mais avançado e complexo. Teria consciência de si mesma, da mesma forma que seres humanos.</div>
+          <div class="topic-item">Ainda não existe — é apenas teórica.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2f')">
+          <span class="topic-icon">🤝</span>
+          <span class="topic-name">Diferença: Assistente Virtual vs Chatbot</span>
+          <span class="topic-chevron" id="tc-t2f">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2f">
+          <div class="topic-item"><strong>Assistente Virtual:</strong> aciona funções em dispositivos inteligentes, realiza pesquisas. Ex: Siri, Alexa, Google Assistente, Cortana, Bixby.</div>
+          <div class="topic-item"><strong>Chatbot:</strong> robô de conversação com diálogos pré-estabelecidos para conversar nos mais diferentes canais (texto ou voz). Usado em e-commerce, atendimento ao cliente, comunicação interna.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t2g')">
+          <span class="topic-icon">🖥️</span>
+          <span class="topic-name">Machine Learning e Deep Learning — Definições</span>
+          <span class="topic-chevron" id="tc-t2g">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t2g">
+          <div class="topic-item"><strong>Machine Learning:</strong> Subárea da IA onde sistemas <strong>aprendem padrões a partir de dados</strong> e fazem previsões SEM serem explicitamente programados. Ajusta parâmetros com base em exemplos e experiências anteriores.</div>
+          <div class="topic-item"><strong>Deep Learning:</strong> Subárea do Machine Learning que utiliza <strong>redes neurais artificiais</strong> com 3 ou mais camadas ocultas.</div>
+          <div class="topic-item"><strong>Outras subáreas da IA:</strong> PLN/NLP (linguagem natural — ex: ChatGPT), Reconhecimento de Fala (Alexa, Siri), Visão Computacional (biometria, veículos autônomos), Robótica.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s3')">
+      <div class="section-dot" style="background:#3fb950"></div>
+      <div>
+        <div class="section-label" style="color:#3fb950">Slide 3</div>
+        <div class="section-title">Tipos de Aprendizado de Máquina</div>
+      </div>
+      <span class="section-count">3 tópicos</span>
+      <span class="chevron" id="chevron-s3">▶</span>
+    </div>
+    <div class="section-body" id="body-s3" style="display:none">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t3a')">
+          <span class="topic-icon">✅</span>
+          <span class="topic-name">Aprendizado Supervisionado</span>
+          <span class="topic-chevron" id="tc-t3a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t3a">
+          <div class="topic-item">Dados <strong>ROTULADOS</strong> — entradas associadas a saídas esperadas (o sistema tem "gabarito").</div>
+          <div class="topic-item"><strong>Exemplos:</strong> Classificar e-mails como spam/não-spam; prever preços de imóveis; identificar "nesta imagem há uma maçã".</div>
+          <div class="topic-item"><strong>Aplicações reais:</strong> Autorização de empréstimos, detecção de fraudes de cartão de crédito, sistemas de recomendação (Amazon, Netflix, TikTok, Instagram).</div>
+          <div class="topic-item"><strong>Vantagem:</strong> excelente para classificação e regressão. Fácil de entender o funcionamento.</div>
+          <div class="topic-item"><strong>Desvantagem:</strong> precisa de dados rotulados de qualidade; pode ter overfitting; rotulagem pode ser trabalhosa.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t3b')">
+          <span class="topic-icon">🔍</span>
+          <span name="topic-name" class="topic-name">Aprendizado Não-Supervisionado</span>
+          <span class="topic-chevron" id="tc-t3b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t3b">
+          <div class="topic-item">Dados <strong>SEM rótulos</strong> — busca padrões ou agrupamentos ocultos sem "gabarito".</div>
+          <div class="topic-item"><strong>Exemplos:</strong> Segmentação de clientes por comportamento de compra; detecção de fraudes online; página de busca do Google.</div>
+          <div class="topic-item"><strong>Algoritmos comuns:</strong> K-means, DBSCAN, Hierarchical Clustering (HCA), PCA.</div>
+          <div class="topic-item"><strong>Vantagem:</strong> Descobre padrões ocultos, útil para análise exploratória. Detecta anomalias.</div>
+          <div class="topic-item"><strong>Desvantagem:</strong> Falta de rótulos dificulta validação; resultados podem ser menos precisos; difícil interpretar.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t3c')">
+          <span class="topic-icon">🎮</span>
+          <span class="topic-name">Aprendizado por Reforço</span>
+          <span class="topic-chevron" id="tc-t3c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t3c">
+          <div class="topic-item">O modelo interage com um ambiente e recebe <strong>recompensas ou penalidades</strong> com base nas ações, ajustando a estratégia para <strong>maximizar o retorno</strong>.</div>
+          <div class="topic-item">Processo de <strong>tentativa e erro</strong> — análogo ao adestramento de animais com reforço positivo/negativo.</div>
+          <div class="topic-item"><strong>Exemplos:</strong> Jogos (AlphaGo, xadrez), controle de robôs (Tesla Optimus), veículos autônomos.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SLIDE 4 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s4')">
+      <div class="section-dot" style="background:#d29922"></div>
+      <div>
+        <div class="section-label" style="color:#d29922">Slide 4</div>
+        <div class="section-title">Redes Neurais e Deep Learning</div>
+      </div>
+      <span class="section-count">5 tópicos</span>
+      <span class="chevron" id="chevron-s4">▶</span>
+    </div>
+    <div class="section-body" id="body-s4" style="display:none">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t4a')">
+          <span class="topic-icon">🧬</span>
+          <span class="topic-name">O que é uma Rede Neural?</span>
+          <span class="topic-chevron" id="tc-t4a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t4a">
+          <div class="topic-item">Modelo de aprendizado de máquina que <strong>simula a estrutura e o comportamento do cérebro humano</strong>.</div>
+          <div class="topic-item">O cérebro tem ~10 bilhões de neurônios conectados por <strong>sinapses</strong> — juntos formam uma grande rede capaz de processar e armazenar informação.</div>
+          <div class="topic-item">Uma Rede Neural Artificial (RNA) simula essa estrutura com unidades (neurônios) organizadas em <strong>camadas sequenciais</strong>.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t4b')">
+          <span class="topic-icon">📐</span>
+          <span class="topic-name">Estrutura: Camadas de Entrada, Oculta e Saída</span>
+          <span class="topic-chevron" id="tc-t4b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t4b">
+          <div class="topic-item"><strong>Camada de ENTRADA:</strong> recebe dados brutos externos (imagens, texto) convertidos para valores numéricos.</div>
+          <div class="topic-item"><strong>Camadas OCULTAS/INTERMEDIÁRIAS:</strong> onde ocorre a maior parte do processamento — extração de características. Podem ser zero ou várias.</div>
+          <div class="topic-item"><strong>Camada de SAÍDA:</strong> fornece o resultado final do modelo.</div>
+          <div class="topic-item">Cada conexão tem um <strong>PESO</strong> ajustado durante o aprendizado. Cada neurônio aplica uma <strong>função de soma</strong> (pesos × entradas) e uma <strong>função de ativação</strong> (determina a saída do neurônio).</div>
+          <div class="topic-item">Em resumo: cada neurônio aplica uma equação matemática aos dados de entrada e transmite o resultado adiante.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t4c')">
+          <span class="topic-icon">🏗️</span>
+          <span class="topic-name">Tipos de Redes Neurais</span>
+          <span class="topic-chevron" id="tc-t4c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t4c">
+          <div class="topic-item"><strong>Feedforward:</strong> tipo mais básico. Dados fluem SOMENTE para frente (entrada→saída). Sem loops.</div>
+          <div class="topic-item"><strong>Convolucionais (CNN):</strong> usadas principalmente para IMAGENS. Usa operação de "convolução" para detectar padrões espaciais (bordas, contornos). Base da Visão Computacional.</div>
+          <div class="topic-item"><strong>Recorrentes (RNN):</strong> possuem LOOPS — saída pode voltar para a entrada, criando uma espécie de "memória". Ideal para SEQUÊNCIAS (texto, tradução automática, geração de texto).</div>
+          <div class="topic-item"><strong>LSTM (Long Short-Term Memory):</strong> variação de RNN com "portas" (gates) que controlam o que lembrar/esquecer. Usada em previsão de séries temporais, reconhecimento de voz, tradução.</div>
+          <div class="topic-item"><strong>AutoEncoders:</strong> encoder comprime os dados → decoder reconstrói. Usados para compressão e detecção de anomalias.</div>
+          <div class="topic-item"><strong>GANs (Generative Adversarial Networks):</strong> duas redes em competição — geradora (cria dados falsos) vs discriminadora (tenta distinguir real/falso). Geram imagens e vídeos.</div>
+          <div class="topic-item"><strong>Transformers:</strong> revolucionaram os LLMs (ChatGPT, BERT). Usam "mecanismo de atenção" — o modelo "presta mais atenção" a certas palavras. Processamento PARALELO. Base dos modelos modernos de linguagem.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t4d')">
+          <span class="topic-icon">📈</span>
+          <span class="topic-name">Deep Learning</span>
+          <span class="topic-chevron" id="tc-t4d">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t4d">
+          <div class="topic-item">Redes neurais com <strong>3 ou mais camadas intermediárias ocultas</strong>.</div>
+          <div class="topic-item">A "profundidade" vem do número de camadas ocultas — permite aprender representações mais complexas dos dados.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t4e')">
+          <span class="topic-icon">🏥</span>
+          <span class="topic-name">Aplicações de Redes Neurais</span>
+          <span class="topic-chevron" id="tc-t4e">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t4e">
+          <div class="topic-item"><strong>Processamento de sinais:</strong> supressão de ruído em linha telefônica — uma das primeiras aplicações comerciais.</div>
+          <div class="topic-item"><strong>Medicina:</strong> armazenar registros médicos (sintomas, diagnóstico, tratamento) em rede de memória associativa; após treinamento, o modelo sugere diagnóstico com base nos sintomas.</div>
+          <div class="topic-item"><strong>Reconhecimento de padrões:</strong> reconhecimento de caracteres manuscritos (dígitos, letras), reconhecimento de padrões da voz.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SLIDES 5+6 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s5')">
+      <div class="section-dot" style="background:#f85149"></div>
+      <div>
+        <div class="section-label" style="color:#f85149">Slides 5 e 6</div>
+        <div class="section-title">LLMs, ELIZA, N-Gram e Word Embeddings</div>
+      </div>
+      <span class="section-count">6 tópicos</span>
+      <span class="chevron" id="chevron-s5">▶</span>
+    </div>
+    <div class="section-body" id="body-s5" style="display:none">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5a')">
+          <span class="topic-icon">💬</span>
+          <span class="topic-name">O que é um LLM?</span>
+          <span class="topic-chevron" id="tc-t5a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5a">
+          <div class="topic-item"><strong>CARRARO (2023):</strong> "Modelo probabilístico que, após ser treinado com muitos textos, consegue prever a próxima palavra em uma sequência de palavras."</div>
+          <div class="topic-item"><strong>RODRIGUES (2024):</strong> "Modelo de IA treinado em grande quantidade de dados de textos para gerar saídas de linguagem semelhantes à linguagem humana."</div>
+          <div class="topic-item"><strong>Exemplos de LLMs:</strong> GPT (OpenAI), Gemini (Google), Copilot (Microsoft), Llama (Meta), LaMDA (Google).</div>
+          <div class="topic-item">LLMs usam Transformers e são treinados para aprender padrões e relações na linguagem humana.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5b')">
+          <span class="topic-icon">🤖</span>
+          <span class="topic-name">ELIZA — O Primeiro Chatbot</span>
+          <span class="topic-chevron" id="tc-t5b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5b">
+          <div class="topic-item">Primeiro software de <strong>simulação de diálogos</strong> — o primeiro chatbot da história. Surgiu nas <strong>décadas de 1950-1960</strong>.</div>
+          <div class="topic-item">Nome vem da personagem <strong>Eliza Doolittle</strong> da peça "Pigmalião" de George Bernard Shaw (1913).</div>
+          <div class="topic-item">Simulava conversa entre <strong>paciente e psicólogo</strong> — o usuário era o paciente e o software o psicólogo.</div>
+          <div class="topic-item">Na época, alguns acadêmicos acreditavam que poderia complementar o tratamento de pacientes com problemas psicológicos.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5c')">
+          <span class="topic-icon">📊</span>
+          <span class="topic-name">N-Gram</span>
+          <span class="topic-chevron" id="tc-t5c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5c">
+          <div class="topic-item">Técnica de <strong>modelagem probabilística</strong> para linguagem.</div>
+          <div class="topic-item">Analisa grandes quantidades de texto medindo a <strong>frequência com que cada palavra (ou grupo de N palavras)</strong> aparece.</div>
+          <div class="topic-item">Tenta <strong>adivinhar a próxima palavra</strong> com base nas palavras imediatamente anteriores.</div>
+          <div class="topic-item">Exemplo: dado "Eu gosto de __", o modelo prevê "pizza", "viajar" etc. baseado em frequências estatísticas.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5d')">
+          <span class="topic-icon">🔢</span>
+          <span class="topic-name">Word Embeddings</span>
+          <span class="topic-chevron" id="tc-t5d">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5d">
+          <div class="topic-item">Cada palavra é transformada em um <strong>vetor numérico</strong> chamado embedding.</div>
+          <div class="topic-item">Palavras com significados SIMILARES têm vetores <strong>PRÓXIMOS no espaço geométrico</strong>.</div>
+          <div class="topic-item">Exemplo: "avião" ficaria próximo de "carro", "trem", "ônibus" (transporte) E de "voar", "aterrissar" (atividades) — e distante de "acariciar", "xícara".</div>
+          <div class="topic-item">Quanto mais dimensões, melhor a representação e as conexões entre palavras.</div>
+          <div class="topic-item"><strong>Word2Vec</strong> (2013, Google, Mikolov): modelo mais inovador para criar word embeddings. É uma rede neural "rasa" com duas técnicas: CBOW e Skip-Gram.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5e')">
+          <span class="topic-icon">↔️</span>
+          <span class="topic-name">CBOW e Skip-Gram (Word2Vec)</span>
+          <span class="topic-chevron" id="tc-t5e">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5e">
+          <div class="topic-item"><strong>CBOW (Continuous Bag of Words):</strong> dado o CONTEXTO (palavras ao redor), prevê a PALAVRA do meio. Ex: "O ___ é o maior time do Brasil" → prevê "Flamengo".</div>
+          <div class="topic-item"><strong>Skip-Gram:</strong> o OPOSTO do CBOW. Dada UMA palavra central, prevê o CONTEXTO ao redor. Ex: dada "Brasil" → prevê "futebol", "país", "oportunidades".</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t5f')">
+          <span class="topic-icon">🆚</span>
+          <span class="topic-name">GPT vs BERT + ChatGPT</span>
+          <span class="topic-chevron" id="tc-t5f">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t5f">
+          <div class="topic-item"><strong>GPT (OpenAI, 2018):</strong> UNIDIRECIONAL — prevê o próximo token usando só o contexto ANTERIOR. "Next Token Prediction". GPT = Generative Pre-trained Transformer.</div>
+          <div class="topic-item"><strong>BERT (Google, 2018):</strong> BIDIRECIONAL — considera contexto ANTERIOR E POSTERIOR. Usa "Masked Language Models" (oculta palavras e prevê com base nos dois lados da frase).</div>
+          <div class="topic-item"><strong>ChatGPT (nov/2022):</strong> chatbot da OpenAI. Atingiu <strong>100 milhões de usuários em 2 meses</strong> (recorde anterior era TikTok com 9 meses). Diferencial: lembra o contexto anterior de toda a conversa.</div>
+          <div class="topic-item"><strong>Outros LLMs:</strong> Llama (Meta, 70B parâmetros, open source), LaMDA (Google Brain, 2021, para diálogo).</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SLIDE 7 -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('s7')">
+      <div class="section-dot" style="background:#ffa657"></div>
+      <div>
+        <div class="section-label" style="color:#ffa657">Slide 7</div>
+        <div class="section-title">Engenharia de Prompt</div>
+      </div>
+      <span class="section-count">4 tópicos</span>
+      <span class="chevron" id="chevron-s7">▶</span>
+    </div>
+    <div class="section-body" id="body-s7" style="display:none">
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t7a')">
+          <span class="topic-icon">📝</span>
+          <span class="topic-name">O que é Engenharia de Prompt?</span>
+          <span class="topic-chevron" id="tc-t7a">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t7a">
+          <div class="topic-item">Área em crescimento que envolve criar <strong>prompts eficazes</strong> para modelos de linguagem (chatbots, geradores de texto).</div>
+          <div class="topic-item">Objetivo: obter respostas <strong>precisas e relevantes</strong>, minimizando ambiguidades e maximizando a utilidade da saída.</div>
+          <div class="topic-item">Um PROMPT é composto por: instrução + contexto + resposta esperada.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t7b')">
+          <span class="topic-icon">0️⃣</span>
+          <span class="topic-name">Zero-Shot Prompting</span>
+          <span class="topic-chevron" id="tc-t7b">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t7b">
+          <div class="topic-item">Instrução DIRETA, <strong>sem nenhum exemplo prévio</strong>.</div>
+          <div class="topic-item">Ex: "Traduza para o inglês: 'Bom dia, tudo bem?'" — sem dar exemplos de tradução antes.</div>
+          <div class="topic-item"><strong>Quando usar:</strong> tarefas simples e claras onde o modelo já entende a instrução.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t7c')">
+          <span class="topic-icon">📌</span>
+          <span class="topic-name">Few-Shot Prompting</span>
+          <span class="topic-chevron" id="tc-t7c">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t7c">
+          <div class="topic-item">Fornece <strong>1 a 5 exemplos</strong> ANTES da instrução principal.</div>
+          <div class="topic-item">Ajuda o modelo a entender o formato/padrão esperado.</div>
+          <div class="topic-item"><strong>Quando usar:</strong> tarefas complexas, ambíguas, ou quando se quer um estilo específico.</div>
+          <div class="topic-item">Origem: artigo do GPT-3 da OpenAI se chama <strong>"Language Models are Few-Shot Learners"</strong>.</div>
+        </div>
+      </div>
+
+      <div class="topic">
+        <div class="topic-header" onclick="toggleTopic('t7d')">
+          <span class="topic-icon">⛓️</span>
+          <span class="topic-name">Chain-of-Thought Prompting</span>
+          <span class="topic-chevron" id="tc-t7d">▶</span>
+        </div>
+        <div class="topic-body" id="tb-t7d">
+          <div class="topic-item">Instrui o modelo a <strong>raciocinar passo a passo</strong> antes de dar a resposta final — "pensar em voz alta".</div>
+          <div class="topic-item"><strong>Vantagem:</strong> melhora muito o raciocínio lógico em tarefas complexas (matemática, análise de múltiplos fatores).</div>
+          <div class="topic-item"><strong>Exemplo:</strong> Sem CoT: "48 ÷ 6 = 8". Com CoT: "6 × 8 = 48, então o resultado é 8" — com justificativa do raciocínio.</div>
+          <div class="topic-item">Origem: artigo do Google <strong>"Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"</strong>.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /study wrap -->
+
+<!-- QUIZ SECTION -->
+<div class="quiz-wrap" id="quizSection">
+  <div id="quizContent"></div>
+  <div id="doneContent" style="display:none"></div>
+</div>
+
+</main>
+
+<script>
+// ---- DATA ----
+const questions = [
+  {
+    id:1, slide:"Slide 1", type:"Objetiva",
+    question:"Qual das afirmações sobre ANI (Inteligência Artificial Estreita) está CORRETA?",
+    options:[
+      "ANI pode transicionar para AGI sem intervenção humana direta",
+      "ANI é projetada para executar UMA tarefa específica, operando sob restrições limitadas",
+      "ANI já possui capacidade de compreender emoções humanas",
+      "ANI é equivalente à AGI em termos de capacidade cognitiva"
+    ],
+    correct:1,
+    explanation:"ANI é a forma de IA que temos HOJE. É treinada para uma tarefa específica e não tem capacidade de ir além do que foi programada. Exemplos: Alexa, Netflix, reconhecimento facial, veículos autônomos."
+  },
+  {
+    id:2, slide:"Slide 1", type:"V ou F",
+    question:"A 'Lei Zero' de Asimov tem prioridade sobre as três primeiras leis da robótica.",
+    options:["Verdadeiro","Falso"],
+    correct:0,
+    explanation:"VERDADEIRO. A Lei Zero foi introduzida posteriormente e estabelece 'Um robô não pode causar dano à humanidade' — com prioridade MÁXIMA sobre as três leis anteriores."
+  },
+  {
+    id:3, slide:"Slide 1", type:"Objetiva",
+    question:"O Teste de Turing, descrito no artigo 'Computing Machinery and Intelligence', consiste em:",
+    options:[
+      "Um computador jogar xadrez contra campeões humanos para medir seu nível",
+      "Um juiz humano tentar distinguir entre humano e máquina em conversa de texto",
+      "Medir a velocidade de processamento de uma IA versus seres humanos",
+      "Verificar se uma IA consegue criar obras de arte originais"
+    ],
+    correct:1,
+    explanation:"No Teste de Turing, um juiz humano conversa por texto com um humano e uma máquina. Se o juiz não conseguir distinguir quem é quem, a máquina é considerada 'inteligente'. O ChatGPT é considerado por muitos como tendo passado neste teste."
+  },
+  {
+    id:4, slide:"Slide 2", type:"Objetiva",
+    question:"Segundo a classificação de Arend Hintz, qual tipo de IA NÃO possui memória e sempre dará a mesma saída para a mesma entrada?",
+    options:[
+      "IA de Memória Limitada",
+      "IA com Teoria da Mente",
+      "Máquinas Reativas",
+      "IA Autoconsciente"
+    ],
+    correct:2,
+    explanation:"Máquinas Reativas são a forma mais básica de IA — sem memória, não aprendem com o passado. Mesma entrada → sempre mesma saída. Exemplo clássico: Deep Blue (xadrez) — calculava movimentos mas NÃO aprendia com partidas anteriores."
+  },
+  {
+    id:5, slide:"Slide 2", type:"Objetiva",
+    question:"Qual a principal diferença entre Assistente Virtual e Chatbot, segundo os slides?",
+    options:[
+      "Assistentes operam apenas por voz; chatbots apenas por texto",
+      "Assistentes acionam funções em dispositivos e fazem pesquisas; chatbots seguem diálogos pré-estabelecidos para interações específicas",
+      "Chatbots possuem inteligência avançada e tomam decisões independentes",
+      "Chatbots são usados exclusivamente para busca na internet"
+    ],
+    correct:1,
+    explanation:"Assistente Virtual (Siri, Alexa, Google Assistente) auxilia o usuário acionando funções em dispositivos e realizando pesquisas. Chatbot é um robô de conversação com diálogos pré-estabelecidos, usado em e-commerce e atendimento ao cliente."
+  },
+  {
+    id:6, slide:"Slide 3", type:"Objetiva",
+    question:"No aprendizado SUPERVISIONADO, como os dados de treinamento são caracterizados?",
+    options:[
+      "São dados sem rótulos, buscando padrões ocultos",
+      "São gerados aleatoriamente pelo próprio algoritmo",
+      "São dados ROTULADOS — entradas associadas a saídas esperadas",
+      "São coletados sem qualquer intervenção humana"
+    ],
+    correct:2,
+    explanation:"No aprendizado supervisionado, os dados têm rótulos — o sistema sabe qual é a resposta correta para cada dado de treinamento. Exemplo: e-mails marcados como 'spam' ou 'não-spam'. O modelo aprende a partir de exemplos com 'gabarito'."
+  },
+  {
+    id:7, slide:"Slide 3", type:"Objetiva",
+    question:"O aprendizado por REFORÇO funciona com base em:",
+    options:[
+      "Dados rotulados fornecidos antes do treinamento",
+      "Agrupamento de dados com características similares",
+      "Recompensas ou penalidades baseadas nas ações do modelo no ambiente",
+      "Redes neurais feedforward exclusivamente"
+    ],
+    correct:2,
+    explanation:"O aprendizado por reforço é como adestrar um cachorro: por tentativa e erro, o modelo recebe recompensas pelo que faz certo e penalidades pelo errado, ajustando a estratégia para maximizar o retorno. Exemplos: jogos, robôs."
+  },
+  {
+    id:8, slide:"Slide 4", type:"Objetiva",
+    question:"Uma rede neural é estruturalmente composta por:",
+    options:[
+      "Apenas uma camada de entrada e uma de saída, sem intermediárias",
+      "Camada de ENTRADA + zero ou mais camadas OCULTAS + camada de SAÍDA",
+      "Exclusivamente camadas ocultas, sem entrada ou saída definidas",
+      "Somente processadores gráficos conectados em série"
+    ],
+    correct:1,
+    explanation:"A estrutura é: Camada de Entrada (recebe dados brutos convertidos em números) → Camadas Ocultas (processamento e extração de características, zero ou mais) → Camada de Saída (resultado final). As conexões têm pesos ajustados durante o aprendizado."
+  },
+  {
+    id:9, slide:"Slide 4", type:"Objetiva",
+    question:"O Deep Learning se diferencia de uma rede neural simples por:",
+    options:[
+      "Não utilizar dados de treinamento para aprender",
+      "Possuir 3 ou mais camadas intermediárias ocultas, dando 'profundidade' à rede",
+      "Ser exclusivamente utilizado para processamento de imagens",
+      "Não utilizar funções de ativação nos neurônios"
+    ],
+    correct:1,
+    explanation:"Deep Learning = redes neurais com 3 ou mais camadas intermediárias ocultas. É a 'profundidade' dessas camadas que dá o nome. Quanto mais camadas, mais representações complexas o modelo consegue aprender."
+  },
+  {
+    id:10, slide:"Slide 4", type:"Objetiva",
+    question:"Qual tipo de rede neural usa 'loops' (saída que volta para a entrada), criando uma 'memória', ideal para processar sequências como texto?",
+    options:[
+      "Redes Feedforward",
+      "Redes Convolucionais (CNN)",
+      "Redes Recorrentes (RNN)",
+      "GANs (Redes Adversárias Generativas)"
+    ],
+    correct:2,
+    explanation:"RNNs (Redes Neurais Recorrentes) permitem que a saída de um nó volte como entrada, criando 'memória'. Isso as torna ideais para tarefas com sequências, como tradução automática, geração de texto e compreensão de linguagem."
+  },
+  {
+    id:11, slide:"Slide 5", type:"Objetiva",
+    question:"ELIZA foi:",
+    options:[
+      "O primeiro Large Language Model criado pelo Google em 2018",
+      "O primeiro software de simulação de diálogos (chatbot), surgido nas décadas de 1950-1960",
+      "Um assistente virtual criado pela Apple, lançado em 2011",
+      "Um modelo de rede neural convolucional para reconhecimento de imagens"
+    ],
+    correct:1,
+    explanation:"ELIZA foi o primeiro chatbot da história, surgido nas décadas de 1950-1960. Simulava conversa entre paciente e psicólogo. Nome vem da personagem Eliza Doolittle da peça 'Pigmalião' de George Bernard Shaw (1913)."
+  },
+  {
+    id:12, slide:"Slide 5", type:"Objetiva",
+    question:"A técnica N-gram funciona:",
+    options:[
+      "Comprimindo imagens usando matrizes de convolução",
+      "Medindo frequência de palavras para prever a próxima com base nas imediatamente anteriores",
+      "Sendo exclusiva do Deep Learning e não pode ser usada em modelos simples",
+      "Treinando modelos com dados sem rótulos para detectar anomalias"
+    ],
+    correct:1,
+    explanation:"N-gram é uma técnica probabilística que analisa a frequência de palavras (ou grupos de N palavras) para prever qual palavra virá a seguir. Exemplo: dado 'Eu gosto de __', o modelo usa frequências para prever 'pizza', 'viajar' etc."
+  },
+  {
+    id:13, slide:"Slides 5/6", type:"Objetiva",
+    question:"No Word2Vec, a técnica CBOW (Continuous Bag of Words) funciona:",
+    options:[
+      "Dada uma palavra central, prevê as palavras ao redor (contexto)",
+      "Comprimindo texto em vetores sem treinamento supervisionado",
+      "Dado o contexto (palavras ao redor), prevê a palavra que está no meio",
+      "Analisando apenas a frequência de bigramas (grupos de 2 palavras)"
+    ],
+    correct:2,
+    explanation:"CBOW prevê UMA palavra a partir do CONTEXTO ao redor. Exemplo dos slides: 'O ___ é o maior time do Brasil' → o modelo prevê 'Flamengo'. Skip-Gram é o inverso: dada a palavra, prevê o contexto."
+  },
+  {
+    id:14, slide:"Slides 5/6", type:"Objetiva",
+    question:"Qual assistente pessoal de IA foi lançado em 2011 e ajudou a popularizar os chatbots?",
+    options:["Google Now","Alexa","Cortana","Siri"],
+    correct:3,
+    explanation:"SIRI (Apple), lançada em 2011, foi o assistente que ajudou a popularizar os chatbots e assistentes virtuais. Esta questão está literalmente na lista de exercícios do professor (questão 12 da lista)."
+  },
+  {
+    id:15, slide:"Slides 5/6", type:"Objetiva",
+    question:"A principal diferença entre GPT e BERT está em:",
+    options:[
+      "GPT usa arquitetura Transformer; BERT não usa Transformer",
+      "GPT é UNIDIRECIONAL (prevê próximo token com contexto anterior); BERT é BIDIRECIONAL (considera contexto anterior e posterior)",
+      "BERT gera imagens; GPT é exclusivo para texto",
+      "GPT foi criado pelo Google em 2018; BERT foi criado pela OpenAI"
+    ],
+    correct:1,
+    explanation:"GPT (OpenAI, 2018): unidirecional — usa só o contexto ANTERIOR para prever o próximo token (Next Token Prediction). BERT (Google, 2018): bidirecional — usa Masked Language Models e considera os dois lados da frase. Ambos usam Transformers."
+  },
+  {
+    id:16, slide:"Slide 7", type:"Objetiva",
+    question:"Zero-shot prompting significa:",
+    options:[
+      "Fornecer vários exemplos antes da instrução principal",
+      "Usar encadeamento de pensamento para raciocinar passo a passo",
+      "Dar apenas a instrução direta ao modelo, sem fornecer exemplos prévios",
+      "Treinar o modelo do zero sem dados pré-existentes"
+    ],
+    correct:2,
+    explanation:"Zero-shot = zero exemplos. Você dá apenas a instrução direta. Funciona bem para tarefas simples e claras onde o modelo já entende o que fazer. Exemplo: 'Traduza para o inglês: Bom dia, tudo bem?' — sem dar nenhum exemplo de tradução antes."
+  },
+  {
+    id:17, slide:"Slide 7", type:"Objetiva",
+    question:"Chain-of-Thought Prompting é utilizado para:",
+    options:[
+      "Tradução automática de textos em tempo real",
+      "Melhorar o desempenho em tarefas complexas, instruindo o modelo a raciocinar passo a passo antes de responder",
+      "Reduzir o tempo de processamento do modelo em tarefas simples",
+      "Gerar imagens a partir de descrições textuais"
+    ],
+    correct:1,
+    explanation:"Chain-of-Thought instrui o modelo a 'pensar em voz alta' — explicar o raciocínio passo a passo antes de dar a resposta. Melhora muito problemas matemáticos e de raciocínio complexo. Criado pelo Google ('Chain-of-Thought Prompting Elicits Reasoning...')."
+  },
+  {
+    id:18, slide:"Slide 1", type:"V ou F",
+    question:"A ASI (Superinteligência Artificial) já foi desenvolvida e está sendo usada em laboratórios em 2025.",
+    options:["Verdadeiro","Falso"],
+    correct:1,
+    explanation:"FALSO. ASI é um conceito HIPOTÉTICO — não existe. Representaria uma IA que ultrapassaria a inteligência humana em todos os sentidos (criatividade, emoções, arte, matemática). O que temos hoje é ANI — IA Estreita."
+  },
+  {
+    id:19, slide:"Slide 2", type:"Objetiva",
+    question:"Arend Hintz, que propôs a classificação de IAs por funcionalidade, é professor na:",
+    options:[
+      "Universidade de Harvard (EUA)",
+      "MIT — Massachusetts Institute of Technology (EUA)",
+      "Dalarna University (Suécia), na área de Genética, Biologia Evolutiva e Machine Learning",
+      "Dartmouth College (EUA), onde o termo IA foi cunhado"
+    ],
+    correct:2,
+    explanation:"Arend Hintz é professor de Genética, Biologia Evolutiva e Machine Learning na Dalarna University, na Suécia. Ele propôs a classificação de IAs por funcionalidade: Máquinas Reativas → Memória Limitada → Teoria da Mente → Autoconsciente."
+  },
+  {
+    id:20, slide:"Slides 5/6", type:"Objetiva",
+    question:"O ChatGPT atingiu 100 milhões de usuários em quanto tempo após seu lançamento (nov/2022), quebrando o recorde do TikTok?",
+    options:["1 semana","2 meses","6 meses","1 ano"],
+    correct:1,
+    explanation:"O ChatGPT atingiu 100 milhões de usuários em apenas 2 meses (fevereiro de 2023), quebrando o recorde do TikTok que levou 9 meses para alcançar essa marca. Isso demonstra o impacto dos LLMs no mercado."
+  }
+];
+
+// ---- STATE ----
+let currentQ = 0, score = 0, selected = null, showAnswer = false;
+let answers = [];
+
+// ---- TAB SWITCH ----
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab.${tab}`).classList.add('active');
+  document.getElementById('studySection').classList.toggle('active', tab === 'study');
+  document.getElementById('quizSection').classList.toggle('active', tab === 'quiz');
+  if (tab === 'quiz') renderQuiz();
+}
+
+// ---- STUDY TOGGLES ----
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const chevron = document.getElementById('chevron-' + id);
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function toggleTopic(id) {
+  const body = document.getElementById('tb-' + id);
+  const chevron = document.getElementById('tc-' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+
+// init: open first section
+document.getElementById('body-s1').style.display = 'block';
+document.getElementById('chevron-s1').classList.add('open');
+
+// ---- QUIZ ----
+function renderQuiz() {
+  if (answers.length === questions.length) { renderDone(); return; }
+  const q = questions[currentQ];
+  const letters = ['A','B','C','D'];
+  const isVF = q.options.length === 2;
+
+  let optionsHTML = q.options.map((opt, i) => {
+    let cls = 'option';
+    if (showAnswer) {
+      if (i === q.correct) cls += ' correct';
+      else if (i === selected && i !== q.correct) cls += ' wrong';
+    }
+    return `<button class="${cls}" onclick="handleAnswer(${i})" ${showAnswer ? 'disabled' : ''}>
+      <span class="option-letter">${isVF ? (i===0?'V':'F') : letters[i]}</span>
+      <span>${opt}</span>
+    </button>`;
+  }).join('');
+
+  const expHTML = showAnswer ? `
+    <div class="explanation">
+      <span class="exp-label">${selected === q.correct ? '✅ Correto!' : '❌ Errado!'}</span>
+      ${q.explanation}
+    </div>` : '';
+
+  const slideColors = {'Slide 1':'#58a6ff','Slide 2':'#bc8cff','Slide 3':'#3fb950','Slide 4':'#d29922','Slide 5':'#f85149','Slides 5/6':'#f85149','Slides 5+6':'#f85149','Slide 7':'#ffa657'};
+  const slideColor = slideColors[q.slide] || '#58a6ff';
+  const pct = Math.round((currentQ / questions.length) * 100);
+
+  document.getElementById('quizContent').innerHTML = `
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width:${pct}%"></div>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-meta">
+        <span class="quiz-num">Questão ${currentQ+1} de ${questions.length}</span>
+        <span class="quiz-slide-badge" style="background:${slideColor}22;color:${slideColor};border:1px solid ${slideColor}44">${q.slide}</span>
+        <span class="quiz-type-badge">${q.type}</span>
+      </div>
+      <div class="quiz-question">${q.question}</div>
+      <div class="options">${optionsHTML}</div>
+      ${expHTML}
+    </div>
+    <div class="quiz-nav">
+      <span class="score-mini">✅ ${score} corretas</span>
+      ${showAnswer ? `<button class="btn-next" onclick="nextQuestion()">${currentQ < questions.length-1 ? 'Próxima →' : 'Ver resultado'}</button>` : `<button class="btn-next" disabled>Selecione uma opção</button>`}
+    </div>
+  `;
+}
+
+function handleAnswer(idx) {
+  if (showAnswer) return;
+  selected = idx;
+  showAnswer = true;
+  const q = questions[currentQ];
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+  answers.push({ correct: isCorrect });
+  renderQuiz();
+}
+
+function nextQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    selected = null;
+    showAnswer = false;
+    renderQuiz();
+  } else {
+    renderDone();
+  }
+}
+
+function renderDone() {
+  document.getElementById('quizContent').style.display = 'none';
+  document.getElementById('doneContent').style.display = 'block';
+  const pct = score / questions.length;
+  let msg, color;
+  if (pct >= 0.9) { msg = "🏆 Excelente! Você está muito bem preparado para a prova!"; color = "#3fb950"; }
+  else if (pct >= 0.7) { msg = "👍 Bom! Revise os erros antes de dormir e vai mandar bem!"; color = "#58a6ff"; }
+  else if (pct >= 0.5) { msg = "📚 Metade certa! Relê o Resumão e tente de novo."; color = "#d29922"; }
+  else { msg = "💪 Não desanima! Vai no Resumão, estuda slide por slide e tente novamente."; color = "#f85149"; }
+
+  const reviewHTML = answers.map((a, i) => {
+    const q = questions[i];
+    return `<div class="rev-item">
+      <div class="rev-dot ${a.correct ? 'c' : 'w'}"></div>
+      <span style="color:var(--muted);min-width:20px">${i+1}.</span>
+      <span style="flex:1;${!a.correct ? 'color:#f85149' : ''}">${q.question.substring(0,70)}${q.question.length > 70 ? '…' : ''}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('doneContent').innerHTML = `
+    <div class="done-card">
+      <div style="font-size:2rem">🎓</div>
+      <div class="done-score" style="color:${color}">${score}/${questions.length}</div>
+      <div class="done-label">${Math.round(pct*100)}% de aproveitamento</div>
+      <div class="done-msg" style="color:${color}">${msg}</div>
+      <button class="btn-retry" onclick="resetQuiz()">🔄 Tentar novamente</button>
+      <div class="answers-review">
+        <h3>Revisão das respostas</h3>
+        ${reviewHTML}
+      </div>
+    </div>
+  `;
+}
+
+function resetQuiz() {
+  currentQ = 0; score = 0; selected = null; showAnswer = false; answers = [];
+  document.getElementById('quizContent').style.display = 'block';
+  document.getElementById('doneContent').style.display = 'none';
+  renderQuiz();
+}
+</script>
+</body>
+</html>
