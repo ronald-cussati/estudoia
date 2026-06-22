@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA · Simulado Multivix 2026</title>
+<style>
+:root{--bg:#0d1117;--s1:#161b22;--s2:#21262d;--bd:#30363d;--tx:#e6edf3;--mu:#8b949e;--bl:#58a6ff;--gr:#3fb950;--pu:#bc8cff;--yw:#d29922;--rd:#f85149;--cy:#39d3bb;--or:#ffa657;--ok:#238636;--ok-bg:#0d2819;--er:#da3633;--er-bg:#2c1215}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:15px}
+
+/* ─── HEADER ─── */
+header{background:#0d1117;border-bottom:1px solid var(--bd);padding:16px 20px 0;position:sticky;top:0;z-index:100}
+.hrow{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.htitle{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+.hbadge{background:var(--s2);border:1px solid var(--bd);border-radius:20px;padding:2px 9px;font-size:.68rem;color:var(--mu);font-family:monospace}
+.hsub{font-size:.75rem;color:var(--mu);margin-bottom:14px}
+.tabs{display:flex;gap:0;overflow-x:auto}
+.tab{padding:8px 16px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu);transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;font-family:monospace}
+.tab:hover:not(.on){color:var(--tx);border-bottom-color:var(--bd)}
+.tab.on{color:var(--tx);border-bottom-color:var(--bl)}
+.tab .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ─── LAYOUT ─── */
+main{max-width:900px;margin:0 auto;padding:24px 14px 80px}
+.pane{display:none}.pane.on{display:block}
+
+/* ─── MAPA DE RISCO ─── */
+.mapa-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:22px;margin-bottom:20px}
+.mapa-title{font-size:1.2rem;font-weight:800;margin-bottom:4px}
+.mapa-sub{font-size:.82rem;color:var(--mu);margin-bottom:20px;line-height:1.5}
+.risk-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.risk-label{font-size:.82rem;color:var(--tx);width:220px;flex-shrink:0;line-height:1.4}
+.risk-track{flex:1;background:var(--s2);border-radius:4px;height:8px}
+.risk-fill{height:8px;border-radius:4px;transition:width .6s}
+.risk-badge{font-size:.68rem;color:var(--mu);width:72px;text-align:right;flex-shrink:0}
+.r-hot{background:linear-gradient(90deg,#f85149,#ff7b72)}
+.r-high{background:linear-gradient(90deg,#ffa657,#d29922)}
+.r-med{background:linear-gradient(90deg,#d29922,#e3b341)}
+.r-low{background:linear-gradient(90deg,#58a6ff,#79c0ff)}
+
+/* ─── ACCORDION ─── */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none}
+.card-h:hover{background:var(--s2)}
+.cdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.clabel{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.ctitle{font-size:.95rem;font-weight:700;flex:1}
+.ccnt{font-size:.7rem;color:var(--mu);background:var(--s2);padding:1px 7px;border-radius:10px}
+.chev{font-size:.7rem;color:var(--mu);transition:transform .2s;margin-left:4px}
+.chev.o{transform:rotate(90deg)}
+.card-body{border-top:1px solid var(--bd)}
+.topic{border-bottom:1px solid var(--bd)}.topic:last-child{border-bottom:none}
+.th{display:flex;align-items:center;gap:8px;padding:10px 18px;cursor:pointer}
+.th:hover{background:var(--s2)}
+.ti{font-size:.8rem;width:18px;text-align:center;flex-shrink:0}
+.tn{font-size:.86rem;font-weight:600;flex:1}
+.thev{font-size:.62rem;color:var(--mu);transition:transform .2s}
+.thev.o{transform:rotate(90deg)}
+.tb{padding:0 18px 12px 46px;display:none}
+.tb.o{display:block}
+.ti2{padding:4px 0 4px 12px;border-left:2px solid var(--bd);font-size:.82rem;line-height:1.65;color:#c9d1d9;margin-bottom:3px}
+.ti2 strong,.ti2 b{color:var(--tx)}
+.ti2.hl{border-left-color:var(--bl)}
+.ti2.warn{border-left-color:var(--rd);color:#ff7b72}
+.ti2.ok{border-left-color:var(--gr)}
+.pill{display:inline-block;padding:1px 6px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:5px}
+.p-new{background:#1a2332;color:var(--bl);border:1px solid #58a6ff33}
+
+/* ─── QUIZ ─── */
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.quiz-header h2{font-size:1rem;font-weight:700}
+.prog-wrap{background:var(--s2);border-radius:4px;height:5px;margin-bottom:18px}
+.prog-fill{height:5px;border-radius:4px;background:var(--gr);transition:width .4s}
+.qcard{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:24px}
+.qmeta{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.qnum{font-size:.7rem;font-weight:700;color:var(--mu);font-family:monospace}
+.qbadge{font-size:.65rem;padding:2px 7px;border-radius:20px;font-weight:700}
+.qtype{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);background:var(--s2);padding:2px 6px;border-radius:4px;font-family:monospace}
+.qtrap{background:#2c1215;color:#ff7b72;border:1px solid #f8514933;font-size:.6rem;padding:2px 6px;border-radius:4px;font-weight:700}
+.qtext{font-size:.97rem;font-weight:600;line-height:1.65;margin-bottom:18px}
+.qctx{background:var(--s2);border-left:3px solid var(--bl);border-radius:0 8px 8px 0;padding:11px 13px;margin-bottom:16px;font-size:.8rem;line-height:1.7;color:#c9d1d9;font-style:italic;white-space:pre-line}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1px solid var(--bd);border-radius:10px;cursor:pointer;transition:all .1s;text-align:left;background:var(--s2);color:var(--tx);font-size:.86rem;line-height:1.5;width:100%}
+.opt:hover:not(:disabled){border-color:#58a6ff55;background:#1a2332}
+.opt:disabled{cursor:default}
+.opt.c{border-color:var(--ok);background:var(--ok-bg)}
+.opt.w{border-color:var(--er);background:var(--er-bg)}
+.olet{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;background:var(--s1);font-family:monospace}
+.opt.c .olet{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.w .olet{background:var(--er);border-color:var(--er);color:#fff}
+.exp{margin-top:16px;padding:12px 14px;border-radius:10px;font-size:.82rem;line-height:1.65}
+.exp.c{background:#0d2819;border:1px solid #2ea04333;color:#7ee787}
+.exp.w{background:#2c1215;border:1px solid #f8514933;color:#ff7b72}
+.exp .elabel{font-weight:800;display:block;margin-bottom:3px}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.btn{border:none;border-radius:8px;font-weight:700;font-size:.86rem;cursor:pointer;transition:opacity .12s;padding:9px 24px;font-family:inherit}
+.btn:hover:not(:disabled){opacity:.82}
+.btn:disabled{background:var(--s2)!important;color:var(--mu)!important;cursor:default}
+.btn-gr{background:var(--gr);color:#0d1117}
+.btn-bl{background:var(--bl);color:#0d1117}
+.btn-mu{background:var(--s2);border:1px solid var(--bd);color:var(--tx)}
+.smini{font-size:.8rem;color:var(--mu)}
+.done{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:32px 22px;text-align:center}
+.done-score{font-size:3rem;font-weight:900;margin:12px 0 5px}
+.done-lbl{font-size:.88rem;color:var(--mu);margin-bottom:18px}
+.done-msg{font-size:.97rem;font-weight:600;margin-bottom:24px}
+.rev{margin-top:24px;text-align:left}
+.rev h3{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:8px;font-family:monospace}
+.rev-item{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:.78rem;line-height:1.45}
+.rev-item:last-child{border-bottom:none}
+.rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* ─── DISCURSIVAS ─── */
+.dscore-banner{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;gap:16px}
+.dscore-num{font-size:1.8rem;font-weight:900}
+.dprog-bar{background:var(--s2);border-radius:4px;height:5px;margin-top:6px}
+.dprog-fill{height:5px;border-radius:4px;background:var(--yw);transition:width .4s}
+.dcard{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:22px;margin-bottom:14px}
+.dnum{font-size:.65rem;font-weight:800;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-bottom:7px;font-family:monospace}
+.dq{font-size:.97rem;font-weight:700;line-height:1.6;margin-bottom:12px}
+.dtip{font-size:.76rem;color:var(--mu);margin-bottom:10px;padding:7px 11px;background:var(--s2);border-radius:7px;line-height:1.5}
+textarea{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:inherit;font-size:.86rem;line-height:1.6;padding:11px;resize:vertical;min-height:105px;outline:none;transition:border-color .15s}
+textarea:focus{border-color:var(--yw)}
+.dbtnrow{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;align-items:center}
+.btn-yw{background:var(--yw);color:#0d1117}
+.gabhint{font-size:.73rem;color:var(--mu)}
+.gabarito{margin-top:14px;padding:13px 15px;background:#1c1608;border:1px solid #d2992244;border-radius:10px;display:none}
+.gabarito.on{display:block}
+.gab-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--yw);margin-bottom:8px;font-family:monospace}
+.gab-item{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:.83rem;line-height:1.55;color:#c9d1d9}
+.gab-item::before{content:"✦";color:var(--yw);flex-shrink:0;font-size:.68rem;margin-top:3px}
+.selfeval{margin-top:12px;display:none}
+.selfeval.on{display:block}
+.se-title{font-size:.76rem;color:var(--mu);margin-bottom:7px;font-weight:600}
+.se-row{display:flex;gap:7px;flex-wrap:wrap}
+.se-btn{padding:7px 16px;border-radius:8px;border:none;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .12s;font-family:inherit}
+.se-ok{background:var(--ok-bg);border:1px solid var(--ok);color:#7ee787}
+.se-ok.sel{background:var(--ok);color:#fff}
+.se-par{background:#1c1608;border:1px solid var(--yw);color:var(--yw)}
+.se-par.sel{background:var(--yw);color:#0d1117}
+.se-er{background:var(--er-bg);border:1px solid var(--er);color:#ff7b72}
+.se-er.sel{background:var(--er);color:#fff}
+.dfeedback{margin-top:9px;font-size:.8rem;line-height:1.6;padding:9px 11px;border-radius:8px;display:none}
+.dfeedback.on{display:block}
+.dfeedback.f-ok{background:var(--ok-bg);color:#7ee787;border:1px solid #23863633}
+.dfeedback.f-par{background:#1c1608;color:#e3b341;border:1px solid #d2992233}
+.dfeedback.f-er{background:var(--er-bg);color:#ff7b72;border:1px solid #f8514933}
+
+/* ─── PEGADINHAS ─── */
+.peg-header{margin-bottom:20px}
+.peg-header h2{font-size:1.2rem;font-weight:800;margin-bottom:5px}
+.peg-header p{font-size:.84rem;color:var(--mu);line-height:1.55}
+.peg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.peg-card{background:var(--s1);border:1px solid #f8514922;border-radius:12px;padding:16px;border-left:3px solid var(--rd)}
+.peg-warn{font-size:.68rem;font-weight:800;color:var(--rd);font-family:monospace;margin-bottom:6px}
+.peg-title{font-size:.92rem;font-weight:800;margin-bottom:6px;color:var(--tx)}
+.peg-body{font-size:.8rem;line-height:1.55;color:var(--mu)}
+.peg-body strong{color:var(--tx)}
+@media(max-width:600px){
+  .peg-grid{grid-template-columns:1fr}
+  header{padding:12px 12px 0}
+  main{padding:14px 10px 60px}
+  .qcard,.dcard{padding:16px 13px}
+  .tab{padding:7px 10px;font-size:.75rem}
+  .risk-label{width:140px;font-size:.75rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <span style="font-size:1.3rem">🤖</span>
+    <span class="htitle">Inteligência Artificial</span>
+    <span class="hbadge">multivix · 2026/1 · prof. André Bessa</span>
+  </div>
+  <p class="hsub">Sistemas de Informação · Slides 1–7 · 65 questões objetivas · 8 discursivas</p>
+  <div class="tabs">
+    <button class="tab on" onclick="go('study')"><span class="dot" style="background:#ffa657"></span>resumo.md</button>
+    <button class="tab" onclick="go('quiz')"><span class="dot" style="background:#58a6ff"></span>simulado.test.ts <span style="font-size:.65rem;opacity:.6">(65q)</span></button>
+    <button class="tab" onclick="go('disc')"><span class="dot" style="background:#3fb950"></span>discursivas.txt</button>
+    <button class="tab" onclick="go('peg')"><span class="dot" style="background:#f85149"></span>pegadinhas.lint</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ════════════════ RESUMO ════════════════ -->
+<div class="pane on" id="pane-study">
+
+<!-- MAPA DE RISCO -->
+<div class="mapa-card">
+  <div class="mapa-title">🗺️ Mapa de risco</div>
+  <div class="mapa-sub">Cruzando os 7 slides com a atividade oficial — ordenado pelo que mais se repetiu.</div>
+  <div class="risk-row"><span class="risk-label">ANI / AGI / ASI</span><div class="risk-track"><div class="risk-fill r-hot" style="width:98%"></div></div><span class="risk-badge">altíssimo</span></div>
+  <div class="risk-row"><span class="risk-label">Classificação de Hintz</span><div class="risk-track"><div class="risk-fill r-hot" style="width:95%"></div></div><span class="risk-badge">altíssimo</span></div>
+  <div class="risk-row"><span class="risk-label">Tipos de aprendizado ML</span><div class="risk-track"><div class="risk-fill r-hot" style="width:93%"></div></div><span class="risk-badge">altíssimo</span></div>
+  <div class="risk-row"><span class="risk-label">CNN (visão computacional)</span><div class="risk-track"><div class="risk-fill r-high" style="width:82%"></div></div><span class="risk-badge">alto</span></div>
+  <div class="risk-row"><span class="risk-label">Teste de Turing</span><div class="risk-track"><div class="risk-fill r-high" style="width:80%"></div></div><span class="risk-badge">alto</span></div>
+  <div class="risk-row"><span class="risk-label">Leis da Robótica (Asimov)</span><div class="risk-track"><div class="risk-fill r-high" style="width:78%"></div></div><span class="risk-badge">alto</span></div>
+  <div class="risk-row"><span class="risk-label">ELIZA / história LLMs</span><div class="risk-track"><div class="risk-fill r-high" style="width:75%"></div></div><span class="risk-badge">alto</span></div>
+  <div class="risk-row"><span class="risk-label">Redes neurais (tipos)</span><div class="risk-track"><div class="risk-fill r-med" style="width:65%"></div></div><span class="risk-badge">médio-alto</span></div>
+  <div class="risk-row"><span class="risk-label">GPT vs BERT</span><div class="risk-track"><div class="risk-fill r-med" style="width:62%"></div></div><span class="risk-badge">médio-alto</span></div>
+  <div class="risk-row"><span class="risk-label">Word Embeddings / N-gram</span><div class="risk-track"><div class="risk-fill r-med" style="width:58%"></div></div><span class="risk-badge">médio-alto</span></div>
+  <div class="risk-row"><span class="risk-label">Engenharia de Prompt</span><div class="risk-track"><div class="risk-fill r-low" style="width:46%"></div></div><span class="risk-badge">médio</span></div>
+  <div class="risk-row"><span class="risk-label">Viés nos dados</span><div class="risk-track"><div class="risk-fill r-low" style="width:42%"></div></div><span class="risk-badge">médio</span></div>
+  <div class="risk-row"><span class="risk-label">IA Generativa</span><div class="risk-track"><div class="risk-fill r-low" style="width:38%"></div></div><span class="risk-badge">médio</span></div>
+</div>
+
+<!-- SLIDE 1 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s1')"><div class="cdot" style="background:var(--bl)"></div><div><div class="clabel" style="color:var(--bl)">Slide 1</div><div class="ctitle">Fundamentos da IA</div></div><span class="ccnt">6 tópicos</span><span class="chev o" id="h-s1">▶</span></div>
+  <div class="card-body" id="b-s1">
+
+    <div class="topic"><div class="th" onclick="tt('t1a')"><span class="ti">⚖️</span><span class="tn">As 4 Leis da Robótica (Asimov)</span><span class="thev" id="tc-t1a">▶</span></div>
+    <div class="tb" id="tb-t1a">
+      <div class="ti2"><b>1ª Lei:</b> Robô não pode ferir humano, nem permitir, por omissão, que sofra dano.</div>
+      <div class="ti2"><b>2ª Lei:</b> Robô deve obedecer ordens humanas, exceto se conflitarem com a 1ª Lei.</div>
+      <div class="ti2"><b>3ª Lei:</b> Robô deve proteger sua existência, desde que não conflite com a 1ª ou 2ª Lei.</div>
+      <div class="ti2 warn"><b>Lei Zero (prioridade MÁXIMA):</b> Robô não pode causar dano à humanidade — tem prioridade sobre as três leis anteriores. Hierarquia: Lei Zero &gt; 1ª &gt; 2ª &gt; 3ª</div>
+      <div class="ti2 warn">São leis de <b>ficção científica</b> — NÃO possuem força jurídica e NÃO são suficientes para regular a IA real.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t1b')"><span class="ti">🧮</span><span class="tn">Alan Turing e o Teste de Turing (1950)</span><span class="thev" id="tc-t1b">▶</span></div>
+    <div class="tb" id="tb-t1b">
+      <div class="ti2"><b>Artigo (1950):</b> "Computing Machinery and Intelligence".</div>
+      <div class="ti2"><b>O teste:</b> Juiz humano conversa por texto com humano e máquina sem saber qual é qual. Se não distinguir → máquina demonstra comportamento inteligente.</div>
+      <div class="ti2 warn"><b>CUIDADO!</b> Passar no teste <strong>NÃO implica</strong> consciência nem aprendizado equivalente ao humano. O teste avalia <em>comportamento externo</em>, não inteligência interna.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t1c')"><span class="ti">🎓</span><span class="tn">John McCarthy — "IA" como termo (1956)</span><span class="thev" id="tc-t1c">▶</span></div>
+    <div class="tb" id="tb-t1c">
+      <div class="ti2">Organizou a <b>Conferência de Dartmouth</b> — onde "Inteligência Artificial" foi cunhado como termo.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t1d')"><span class="ti">📖</span><span class="tn">Definição de IA — cite o autor!</span><span class="thev" id="tc-t1d">▶</span></div>
+    <div class="tb" id="tb-t1d">
+      <div class="ti2"><b>CARRARO (2023):</b> "Campo da Ciência da Computação que cria sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana — aprender, raciocinar, tomar decisões."</div>
+      <div class="ti2"><b>LIMA (2014):</b> Capacidades: aquisição de conhecimentos, resolução de problemas, reconhecimento de padrões, comunicação em linguagem coloquial, aprendizado.</div>
+      <div class="ti2 hl"><b>Discursiva:</b> Mencione o autor pelo nome: "Segundo Carraro (2023)..."</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t1e')"><span class="ti">🔺</span><span class="tn">ANI / AGI / ASI — Os 3 tipos</span><span class="thev" id="tc-t1e">▶</span></div>
+    <div class="tb" id="tb-t1e">
+      <div class="ti2"><b>ANI (Estreita/Focada):</b> A IA de HOJE. Projetada para UMA tarefa específica. Exemplos: Alexa, Netflix, DeepFace, AlphaGo, filtro de spam.</div>
+      <div class="ti2"><b>AGI (Geral/Forte):</b> HIPOTÉTICA. Inteligência aplicável a qualquer tarefa cognitiva humana. Não existe.</div>
+      <div class="ti2"><b>ASI (Superinteligente):</b> HIPOTÉTICA. Ultrapassaria humanos em TUDO — criatividade, emoções, matemática. Seria consciente de si mesma.</div>
+      <div class="ti2 warn"><b>Pegadinha recorrente:</b> AlphaGo, Netflix e DeepFace são <strong>TODOS ANI</strong> — fazem uma coisa bem, não generalizam.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t1f')"><span class="ti">🗣️</span><span class="tn">Exemplos práticos de IA</span><span class="thev" id="tc-t1f">▶</span></div>
+    <div class="tb" id="tb-t1f">
+      <div class="ti2"><b>Recomendação:</b> Netflix — analisa histórico de visualização e avaliações.</div>
+      <div class="ti2"><b>Predição:</b> Amazon — ~35% das compras vêm de recomendações da IA.</div>
+      <div class="ti2"><b>Voz:</b> Alexa, Siri (2011 — popularizou chatbots), Google Assistente, Cortana, Bixby.</div>
+      <div class="ti2"><b>GitHub Copilot:</b> IA para devs no VS Code / JetBrains — GitHub + OpenAI.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s2')"><div class="cdot" style="background:var(--pu)"></div><div><div class="clabel" style="color:var(--pu)">Slide 2</div><div class="ctitle">Classificação de Hintz + ML/DL</div></div><span class="ccnt">7 tópicos</span><span class="chev" id="h-s2">▶</span></div>
+  <div class="card-body" id="b-s2" style="display:none">
+
+    <div class="topic"><div class="th" onclick="tt('t2a')"><span class="ti">👤</span><span class="tn">Arend Hintz (Hintze) — Quem é?</span><span class="thev" id="tc-t2a">▶</span></div>
+    <div class="tb" id="tb-t2a">
+      <div class="ti2">Professor de <b>Genética, Biologia Evolutiva e Machine Learning</b> na <b>Dalarna University (Suécia)</b>.</div>
+      <div class="ti2 warn">Não confundir com Geoffrey Hinton (pioneiro de Deep Learning). São pessoas diferentes.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2b')"><span class="ti">⚙️</span><span class="tn">1. Máquinas Reativas</span><span class="thev" id="tc-t2b">▶</span></div>
+    <div class="tb" id="tb-t2b">
+      <div class="ti2">Forma mais <b>básica</b>. <b>SEM memória.</b> Mesma entrada → <b>sempre mesma saída.</b></div>
+      <div class="ti2"><b>Exemplo clássico:</b> Deep Blue (IBM) — calculava movimentos de xadrez mas <strong>não aprendia com partidas anteriores</strong>.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2c')"><span class="ti">🧠</span><span class="tn">2. IA de Memória Limitada</span><span class="thev" id="tc-t2c">▶</span></div>
+    <div class="tb" id="tb-t2c">
+      <div class="ti2">Aprende com <b>experiências passadas e dados novos</b>. Usa Machine Learning.</div>
+      <div class="ti2"><b>Exemplos:</b> Carros autônomos, Siri, Alexa, Google Assistente, chatbots modernos.</div>
+      <div class="ti2 hl">Chatbot que <b>melhora respostas com base no histórico</b> = Memória Limitada.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2d')"><span class="ti">💭</span><span class="tn">3. IA com Teoria da Mente</span><span class="thev" id="tc-t2d">▶</span></div>
+    <div class="tb" id="tb-t2d">
+      <div class="ti2"><b>HIPOTÉTICA:</b> compreenderia os pensamentos e emoções de outros para definir suas ações.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2e')"><span class="ti">🪞</span><span class="tn">4. IA Autoconsciente</span><span class="thev" id="tc-t2e">▶</span></div>
+    <div class="tb" id="tb-t2e">
+      <div class="ti2"><b>HIPOTÉTICA:</b> nível mais avançado. Teria <b>consciência de si mesma</b> como seres humanos. Não existe.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2f')"><span class="ti">🤝</span><span class="tn">Assistente Virtual vs Chatbot</span><span class="thev" id="tc-t2f">▶</span></div>
+    <div class="tb" id="tb-t2f">
+      <div class="ti2"><b>Assistente Virtual:</b> aciona funções em dispositivos, realiza pesquisas. Ex: Siri, Alexa, Google Assistente.</div>
+      <div class="ti2"><b>Chatbot:</b> robô de conversação com diálogos pré-estabelecidos. Usado em e-commerce, atendimento ao cliente.</div>
+    </div></div>
+
+    <div class="topic"><div class="th" onclick="tt('t2g')"><span class="ti">💻</span><span class="tn">Machine Learning e Deep Learning</span><span class="thev" id="tc-t2g">▶</span></div>
+    <div class="tb" id="tb-t2g">
+      <div class="ti2"><b>ML:</b> sistemas aprendem padrões de dados SEM serem explicitamente programados.</div>
+      <div class="ti2"><b>Deep Learning:</b> subárea do ML com redes neurais de <b>3+ camadas ocultas.</b></div>
+      <div class="ti2"><b>Subáreas da IA:</b> PLN/NLP (ChatGPT), Reconhecimento de Fala (Alexa), Visão Computacional (biometria), Robótica.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s3')"><div class="cdot" style="background:var(--gr)"></div><div><div class="clabel" style="color:var(--gr)">Slide 3</div><div class="ctitle">Tipos de Aprendizado de Máquina</div></div><span class="ccnt">3 tópicos</span><span class="chev" id="h-s3">▶</span></div>
+  <div class="card-body" id="b-s3" style="display:none">
+    <div class="topic"><div class="th" onclick="tt('t3a')"><span class="ti">✅</span><span class="tn">Supervisionado</span><span class="thev" id="tc-t3a">▶</span></div>
+    <div class="tb" id="tb-t3a">
+      <div class="ti2">Dados <b>ROTULADOS</b> — entradas com saídas esperadas (gabarito). Ex: spam/não-spam, diagnóstico.</div>
+      <div class="ti2"><b>Aplicações:</b> Autorização de empréstimos, detecção de fraudes, sistemas de recomendação (Amazon, Netflix, TikTok).</div>
+      <div class="ti2">Risco: overfitting — modelo decora os dados de treino mas não generaliza.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t3b')"><span class="ti">🔍</span><span class="tn">Não-Supervisionado</span><span class="thev" id="tc-t3b">▶</span></div>
+    <div class="tb" id="tb-t3b">
+      <div class="ti2">Dados <b>SEM rótulos</b> — busca padrões ocultos sem gabarito. Ex: segmentação de clientes, detecção de anomalias.</div>
+      <div class="ti2"><b>Algoritmos:</b> K-means, DBSCAN, Hierarchical Clustering, PCA.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t3c')"><span class="ti">🎮</span><span class="tn">Por Reforço</span><span class="thev" id="tc-t3c">▶</span></div>
+    <div class="tb" id="tb-t3c">
+      <div class="ti2">Agente interage com ambiente recebendo <b>recompensas ou penalidades.</b> Tentativa e erro.</div>
+      <div class="ti2"><b>Exemplos:</b> AlphaGo (derrotou Ke Jie em 2017), robôs, Tesla Optimus.</div>
+      <div class="ti2 warn">AlphaGo NÃO foi programado com regras — Go tem mais configurações que átomos no universo. Usou reforço.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SLIDE 4 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s4')"><div class="cdot" style="background:var(--yw)"></div><div><div class="clabel" style="color:var(--yw)">Slide 4</div><div class="ctitle">Redes Neurais e Deep Learning</div></div><span class="ccnt">5 tópicos</span><span class="chev" id="h-s4">▶</span></div>
+  <div class="card-body" id="b-s4" style="display:none">
+    <div class="topic"><div class="th" onclick="tt('t4a')"><span class="ti">🧬</span><span class="tn">Estrutura: Entrada / Oculta / Saída</span><span class="thev" id="tc-t4a">▶</span></div>
+    <div class="tb" id="tb-t4a">
+      <div class="ti2"><b>Entrada:</b> recebe dados brutos (imagens, texto) em valores numéricos.</div>
+      <div class="ti2"><b>Ocultas:</b> processamento e extração de características. Zero ou mais camadas.</div>
+      <div class="ti2"><b>Saída:</b> resultado final do modelo.</div>
+      <div class="ti2">Cada conexão tem um <b>peso</b>. Neurônio aplica <b>função de soma + função de ativação</b>.</div>
+      <div class="ti2 warn"><b>Funções de ativação NÃO-lineares (Q2 da atividade!):</b> permitem que múltiplas camadas representem funções complexas impossíveis só com transformações lineares.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t4b')"><span class="ti">🏗️</span><span class="tn">Tipos de Redes Neurais</span><span class="thev" id="tc-t4b">▶</span></div>
+    <div class="tb" id="tb-t4b">
+      <div class="ti2"><b>Feedforward:</b> dados fluem SOMENTE para frente. Sem loops. Tipo mais básico.</div>
+      <div class="ti2 hl"><b>CNN (caiu 2x na atividade!):</b> para IMAGENS. Usa convolução para detectar padrões espaciais. Visão Computacional.</div>
+      <div class="ti2"><b>RNN:</b> tem LOOPS — cria "memória". Para sequências (texto, tradução).</div>
+      <div class="ti2"><b>LSTM:</b> variação de RNN com "portas" (gates) que controlam o que lembrar/esquecer.</div>
+      <div class="ti2"><b>AutoEncoders:</b> encoder comprime + decoder reconstrói. Detecção de anomalias.</div>
+      <div class="ti2"><b>GANs:</b> geradora (cria dados falsos) vs discriminadora (tenta distinguir real/falso).</div>
+      <div class="ti2"><b>Transformers:</b> base dos LLMs. "Mecanismo de atenção". Processamento paralelo.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t4c')"><span class="ti">📈</span><span class="tn">Deep Learning</span><span class="thev" id="tc-t4c">▶</span></div>
+    <div class="tb" id="tb-t4c">
+      <div class="ti2">Redes com <b>3 ou mais camadas intermediárias ocultas.</b> Aprende representações complexas.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t4d')"><span class="ti">🏥</span><span class="tn">Aplicações de Redes Neurais</span><span class="thev" id="tc-t4d">▶</span></div>
+    <div class="tb" id="tb-t4d">
+      <div class="ti2"><b>Processamento de sinais:</b> supressão de ruído em linha telefônica.</div>
+      <div class="ti2"><b>Medicina:</b> rede de memória associativa armazena (sintomas + diagnóstico + tratamento) e sugere diagnóstico.</div>
+      <div class="ti2"><b>Reconhecimento de padrões:</b> caracteres manuscritos, reconhecimento de voz.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t4e')"><span class="ti">🔙</span><span class="tn">Backpropagation</span><span class="thev" id="tc-t4e">▶</span></div>
+    <div class="tb" id="tb-t4e">
+      <div class="ti2">Algoritmo de treinamento que <b>propaga o erro de volta</b> pelas camadas para ajustar os pesos.</div>
+      <div class="ti2 warn">Backpropagation <strong>NÃO elimina viés nos dados</strong> — ele só ajusta pesos. Viés é problema de qualidade dos dados.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SLIDES 5+6 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s5')"><div class="cdot" style="background:var(--rd)"></div><div><div class="clabel" style="color:var(--rd)">Slides 5+6</div><div class="ctitle">LLMs, ELIZA, N-Gram, Word Embeddings</div></div><span class="ccnt">6 tópicos</span><span class="chev" id="h-s5">▶</span></div>
+  <div class="card-body" id="b-s5" style="display:none">
+    <div class="topic"><div class="th" onclick="tt('t5a')"><span class="ti">💬</span><span class="tn">O que é um LLM?</span><span class="thev" id="tc-t5a">▶</span></div>
+    <div class="tb" id="tb-t5a">
+      <div class="ti2"><b>CARRARO (2023):</b> "Modelo probabilístico que prevê a próxima palavra em uma sequência de palavras."</div>
+      <div class="ti2"><b>RODRIGUES (2024):</b> "Modelo de IA treinado em grande quantidade de textos para gerar saídas semelhantes à linguagem humana."</div>
+      <div class="ti2"><b>Exemplos:</b> GPT / ChatGPT (OpenAI), Gemini (Google), Llama (Meta, 70B params, open source), LaMDA (Google Brain, 2021), BERT (Google, 2018).</div>
+      <div class="ti2 hl"><b>Fine-tuning:</b> pré-treinado com dados genéricos + ajustado para domínio específico = reduz drasticamente o tempo de treinamento.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t5b')"><span class="ti">🤖</span><span class="tn">ELIZA — O Primeiro Chatbot</span><span class="thev" id="tc-t5b">▶</span></div>
+    <div class="tb" id="tb-t5b">
+      <div class="ti2">Primeiro software de <b>simulação de diálogos</b>. Décadas de <b>1950-1960.</b></div>
+      <div class="ti2">Nome vem de <b>Eliza Doolittle</b> da peça "Pigmalião" de George Bernard Shaw (1913).</div>
+      <div class="ti2">Simulava conversa <b>paciente–psicólogo.</b></div>
+      <div class="ti2 warn">ELIZA era baseada em <strong>REGRAS</strong> — NÃO em redes neurais profundas. NÃO é um LLM.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t5c')"><span class="ti">📊</span><span class="tn">N-Gram</span><span class="thev" id="tc-t5c">▶</span></div>
+    <div class="tb" id="tb-t5c">
+      <div class="ti2">Técnica probabilística: analisa frequência de palavras (ou grupos de N palavras) para <b>prever a próxima</b> com base nas imediatamente anteriores.</div>
+      <div class="ti2 warn">LLMs modernos são <strong>muito mais precisos</strong> que N-gram para geração de linguagem.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t5d')"><span class="ti">🔢</span><span class="tn">Word Embeddings</span><span class="thev" id="tc-t5d">▶</span></div>
+    <div class="tb" id="tb-t5d">
+      <div class="ti2">Palavras → <b>vetores numéricos</b>. Palavras similares → vetores <b>próximos no espaço geométrico.</b></div>
+      <div class="ti2 warn">Embeddings têm <strong>CENTENAS de dimensões</strong> — não uma. Quanto mais, melhor a representação.</div>
+      <div class="ti2"><b>Word2Vec (2013, Google, Mikolov):</b> CBOW e Skip-gram.</div>
+      <div class="ti2"><b>CBOW:</b> dado o CONTEXTO → prevê a PALAVRA. Ex: "O __ é o maior time do Brasil" → "Flamengo".</div>
+      <div class="ti2"><b>Skip-gram:</b> dada a PALAVRA → prevê o CONTEXTO. São OPOSTOS.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t5e')"><span class="ti">🆚</span><span class="tn">GPT vs BERT + ChatGPT</span><span class="thev" id="tc-t5e">▶</span></div>
+    <div class="tb" id="tb-t5e">
+      <div class="ti2"><b>GPT (OpenAI, 2018):</b> UNIDIRECIONAL — prevê próximo token usando só o contexto ANTERIOR. GPT = Generative Pre-trained Transformer.</div>
+      <div class="ti2"><b>BERT (Google, 2018):</b> BIDIRECIONAL — considera contexto ANTERIOR e POSTERIOR. Usa Masked Language Models.</div>
+      <div class="ti2"><b>ChatGPT (nov/2022):</b> 100 milhões de usuários em 2 meses (recorde anterior: TikTok com 9 meses).</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t5f')"><span class="ti">✨</span><span class="tn">IA Generativa <span class="pill p-new">NOVO</span></span><span class="thev" id="tc-t5f">▶</span></div>
+    <div class="tb" id="tb-t5f">
+      <div class="ti2">Sistemas capazes de <b>criar novos conteúdos</b> — texto, imagens, vídeo, código.</div>
+      <div class="ti2"><b>Exemplos:</b> ChatGPT (texto), DALL-E (imagens), Stable Diffusion (imagens), GitHub Copilot (código).</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- SLIDE 7 -->
+<div class="card">
+  <div class="card-h" onclick="tgl('s7')"><div class="cdot" style="background:var(--or)"></div><div><div class="clabel" style="color:var(--or)">Slide 7</div><div class="ctitle">Engenharia de Prompt + Riscos Éticos</div></div><span class="ccnt">4 tópicos</span><span class="chev" id="h-s7">▶</span></div>
+  <div class="card-body" id="b-s7" style="display:none">
+    <div class="topic"><div class="th" onclick="tt('t7a')"><span class="ti">📝</span><span class="tn">Zero-Shot / Few-Shot / Chain-of-Thought</span><span class="thev" id="tc-t7a">▶</span></div>
+    <div class="tb" id="tb-t7a">
+      <div class="ti2"><b>Zero-Shot:</b> instrução direta SEM exemplos. Para tarefas simples.</div>
+      <div class="ti2"><b>Few-Shot:</b> 1-5 exemplos ANTES da instrução. Para tarefas complexas ou estilo específico. Origem: artigo GPT-3 "Language Models are Few-Shot Learners".</div>
+      <div class="ti2"><b>Chain-of-Thought:</b> instrui o modelo a raciocinar passo a passo antes de responder. Melhora problemas matemáticos e lógicos. Origem: artigo Google "Chain-of-Thought Prompting Elicits Reasoning in LLMs".</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t7b')"><span class="ti">⚠️</span><span class="tn">Riscos Éticos <span class="pill p-new">NOVO</span></span><span class="thev" id="tc-t7b">▶</span></div>
+    <div class="tb" id="tb-t7b">
+      <div class="ti2"><b>Knight Capital Group (ago/2012):</b> bug causou perda de <b>US$ 460 milhões</b> em UM dia. Um dos maiores erros de programação da história.</div>
+      <div class="ti2"><b>Riscos:</b> invasão de privacidade, falta de transparência, armas autônomas, desemprego em funções menos qualificadas.</div>
+      <div class="ti2"><b>LGPD (Brasil):</b> regula uso de dados pessoais e privacidade. Complementada por projetos de lei específicos para IA.</div>
+      <div class="ti2 warn">A total automação <strong>NÃO está concluída</strong> — políticas públicas de adaptação são necessárias.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t7c')"><span class="ti">🎯</span><span class="tn">Viés nos Dados <span class="pill p-new">NOVO</span></span><span class="thev" id="tc-t7c">▶</span></div>
+    <div class="tb" id="tb-t7c">
+      <div class="ti2">Dados não representativos → modelo aprende <b>correlações espúrias</b>. Ex: todos os cachorros são pretos → modelo aprende cor, não animal.</div>
+      <div class="ti2"><b>Consequências:</b> discriminação em reconhecimento facial, crédito financeiro, seleção de currículos.</div>
+      <div class="ti2 warn">Backpropagation <strong>NÃO</strong> elimina viés. NÃO é fácil de corrigir. Afeta TODOS os tipos de IA.</div>
+    </div></div>
+    <div class="topic"><div class="th" onclick="tt('t7d')"><span class="ti">💡</span><span class="tn">Princípios de Bons Prompts</span><span class="thev" id="tc-t7d">▶</span></div>
+    <div class="tb" id="tb-t7d">
+      <div class="ti2">1. Ser claro e preciso. 2. Dividir tarefas complexas. 3. Pedir que explique passos. 4. Pedir justificativas. 5. Gerar múltiplas respostas e escolher a melhor.</div>
+    </div></div>
+  </div>
+</div>
+
+</div><!-- /pane-study -->
+
+<!-- ════════════════ QUIZ ════════════════ -->
+<div class="pane" id="pane-quiz">
+  <div class="quiz-header">
+    <h2>simulado.test.ts</h2>
+    <span class="smini" id="qtotal-label">65 questões · slides 1–7</span>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="qprog" style="width:0%"></div></div>
+  <div id="qcontent"></div>
+  <div id="qdone" style="display:none"></div>
+</div>
+
+<!-- ════════════════ DISCURSIVAS ════════════════ -->
+<div class="pane" id="pane-disc">
+  <div class="dscore-banner" id="dscore-banner">
+    <div><div class="dscore-num" id="dscore-num" style="color:var(--yw)">0/8</div><div style="font-size:.78rem;color:var(--mu)">questões avaliadas</div></div>
+    <div style="flex:1"><div style="font-size:.78rem;color:var(--mu);margin-bottom:5px">Progresso</div><div class="dprog-bar"><div class="dprog-fill" id="dprog" style="width:0%"></div></div></div>
+  </div>
+  <div id="disc-questions"></div>
+</div>
+
+<!-- ════════════════ PEGADINHAS ════════════════ -->
+<div class="pane" id="pane-peg">
+  <div class="peg-header">
+    <h2>⚠️ Pegadinhas que mais derrubam</h2>
+    <p>Os 10 erros conceituais mais comuns na prova de IA. Leia isso na manhã da prova.</p>
+  </div>
+  <div class="peg-grid">
+    <div class="peg-card"><div class="peg-warn">warning(01)</div><div class="peg-title">ELIZA ≠ LLM</div><div class="peg-body">ELIZA era baseada em <strong>regras pré-definidas</strong> — não em redes neurais profundas com grandes volumes de dados. É o oposto de um LLM.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(02)</div><div class="peg-title">AlphaGo / Netflix = ANI</div><div class="peg-body">Por mais impressionantes que sejam, AlphaGo, DeepFace e Netflix são <strong>todos ANI</strong>. Fazem UMA coisa bem — não generalizam para outras tarefas.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(03)</div><div class="peg-title">Turing ≠ Consciência</div><div class="peg-body">Passar no Teste de Turing <strong>não implica</strong> que a máquina tem consciência ou aprende como humanos. O teste avalia apenas comportamento externo.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(04)</div><div class="peg-title">Asimov não regula IA real</div><div class="peg-body">As Leis de Asimov são <strong>ficção científica</strong>. Não têm força jurídica. Por si só, não são suficientes para regular sistemas de IA no mundo real.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(05)</div><div class="peg-title">Deep Blue = Reativa (não ML!)</div><div class="peg-body">Deep Blue calculava movimentos mas <strong>não aprendia com erros anteriores</strong>. É Máquina Reativa. Carros autônomos e Siri são Memória Limitada.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(06)</div><div class="peg-title">Embeddings têm 100s de dims</div><div class="peg-body">Word Embeddings representam palavras em <strong>centenas de dimensões</strong>, não em uma. Quanto mais dimensões, melhor a representação semântica.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(07)</div><div class="peg-title">ASI e AGI são hipotéticas</div><div class="peg-body">Só <strong>ANI existe hoje</strong>. AGI (inteligência geral) e ASI (superinteligência) são conceitos teóricos que ainda não foram alcançados.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(08)</div><div class="peg-title">Backprop ≠ elimina viés</div><div class="peg-body">Backpropagation ajusta pesos da rede — <strong>não detecta nem corrige viés nos dados</strong>. Viés é um problema de qualidade e representatividade dos dados.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(09)</div><div class="peg-title">CBOW ≠ Skip-gram</div><div class="peg-body"><strong>São opostos</strong>: CBOW prevê a PALAVRA dado o contexto. Skip-gram prevê o CONTEXTO dada a palavra. Não confundir.</div></div>
+    <div class="peg-card"><div class="peg-warn">warning(10)</div><div class="peg-title">GPT uni · BERT bi</div><div class="peg-body"><strong>GPT é unidirecional</strong> (só contexto anterior). <strong>BERT é bidirecional</strong> (contexto anterior E posterior). Não inverter — isso cai em prova.</div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ═════ TAB ═════
+function go(t){
+  ['study','quiz','disc','peg'].forEach(id=>{
+    document.getElementById('pane-'+id).classList.remove('on')
+  })
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'))
+  document.getElementById('pane-'+t).classList.add('on')
+  const idx={study:0,quiz:1,disc:2,peg:3}[t]
+  document.querySelectorAll('.tab')[idx].classList.add('on')
+  if(t==='quiz'&&!qS)initQ()
+  if(t==='disc'&&!dS)initD()
+}
+
+// ═════ ACCORDION ═════
+function tgl(id){
+  const b=document.getElementById('b-'+id),h=document.getElementById('h-'+id)
+  const o=b.style.display!=='none'
+  b.style.display=o?'none':'block'
+  h.classList.toggle('o',!o)
+}
+function tt(id){
+  document.getElementById('tb-'+id).classList.toggle('o')
+  document.getElementById('tc-'+id).classList.toggle('o')
+}
+document.getElementById('b-s1').style.display='block'
+
+// ═════ QUIZ DATA (65 questões) ═════
+const QQ=[
+/* 01-15: atividade oficial */
+{n:1,tag:'Slide 1',ctx:'I. O Teste de Turing foi proposto na década de 1950 e avalia se uma máquina pode exibir comportamento indistinguível do humano em uma conversa textual.\nII. O fato de uma máquina passar no Teste de Turing implica necessariamente que ela possui consciência e capacidade de aprendizado equivalente à humana.\nIII. Apesar de muitos sistemas modernos passarem no Teste de Turing, a capacidade de aprendizado dos computadores ainda não é igual à dos seres humanos.\nIV. O Teste de Turing eliminou por completo a necessidade de outros critérios para avaliar a inteligência artificial.',
+q:'Sobre o Teste de Turing (1950, Alan Turing), estão CORRETAS apenas as afirmações:',
+opts:['I e II','II e IV','I e III','III e IV','I, II e IV'],c:2,
+exp:'I ✅ Proposto em 1950, avalia comportamento indistinguível. | II ❌ Passar no teste NÃO implica consciência nem aprendizado equivalente. | III ✅ Sistemas modernos passam mas capacidade não é igual. | IV ❌ O teste não eliminou outros critérios.'},
+{n:2,tag:'Slide 4',q:'Em redes neurais artificiais, as funções de ativação não lineares são essenciais porque:',
+opts:['Reduzem o tempo de treinamento eliminando camadas ocultas','Permitem que múltiplas camadas representem funções complexas impossíveis só com transformações lineares','Substituem a necessidade de dados de treinamento','Garantem que o modelo nunca apresente overfitting','Eliminam a necessidade de ajuste de hiperparâmetros'],c:1,
+exp:'Sem não-linearidade, empilhar camadas seria equivalente a uma única camada linear. Funções de ativação (ReLU, Sigmoid) permitem à rede aprender padrões complexos e não-lineares.'},
+{n:3,tag:'Slide 1',ctx:'• DeepFace (Facebook): reconhece rostos em imagens.\n• AlphaGo (DeepMind): aprendeu a jogar Go e derrotou Ke Jie em 2017.\n• Sistema de recomendação da Netflix: sugere filmes conforme histórico.',
+q:'Com base na classificação em IA Focada (ANI), Generalizada (AGI) e Superinteligente (ASI), os três sistemas são, respectivamente:',
+opts:['IA Superinteligente, Generalizada e Focada','IA Focada, Superinteligente e Generalizada','IA Generalizada, Focada e Superinteligente','IA Focada, IA Focada e IA Focada','IA Generalizada, Generalizada e Focada'],c:3,
+exp:'TODOS são ANI (IA Estreita)! DeepFace → rostos (1 tarefa). AlphaGo → Go (1 tarefa). Netflix → filmes (1 tarefa). Nenhum generaliza — são especialistas em uma tarefa.'},
+{n:4,tag:'Slide 4',q:'Uma CNN (Rede Neural Convolucional) é especialmente indicada para:',
+opts:['Compressão de arquivos','Gerenciamento de bancos de dados','Visão computacional e reconhecimento de imagens','Criptografia assimétrica','Modelagem de redes'],c:2,
+exp:'CNN usa a operação de convolução para detectar padrões espaciais em imagens (bordas, contornos, formas). É a base da Visão Computacional — reconhecimento facial, biometria, veículos autônomos.'},
+{n:5,tag:'Slide 3',ctx:'I. Algoritmo treina com e-mails marcados como "spam" ou "não spam".\nII. Robô aprende a andar recebendo pontos positivos (avança) e negativos (cai).\nIII. Sistema agrupa clientes automaticamente em segmentos sem categorias prévias.',
+q:'Os cenários I, II e III correspondem, respectivamente:',
+opts:['Supervisionado, Não Supervisionado e por Reforço','Não Supervisionado, por Reforço e Supervisionado','Por Reforço, Supervisionado e Não Supervisionado','Supervisionado, por Reforço e Não Supervisionado','Não Supervisionado, Supervisionado e por Reforço'],c:3,
+exp:'I → SUPERVISIONADO: rótulos "spam/não spam" = gabarito. | II → REFORÇO: pontos positivos/negativos = recompensas/penalidades. | III → NÃO SUPERVISIONADO: agrupa SEM categorias pré-definidas.'},
+{n:6,tag:'Slide 7',ctx:'Knight Capital Group (2012): US$ 460 milhões perdidos em um dia. LGPD regula dados no Brasil. Riscos: privacidade, desemprego, armas autônomas.',
+q:'É INCORRETO afirmar que:',
+opts:['A IA pode gerar perda de postos de trabalho menos qualificados','O caso Knight Capital exemplifica riscos de sistemas automatizados mal desenvolvidos','A LGPD busca endereçar preocupações com privacidade no uso da IA','A total automação das atividades humanas pela IA é um processo já concluído, dispensando políticas adicionais','Questões éticas como falta de transparência representam desafios ainda longe de ser resolvidos'],c:3,
+exp:'D é INCORRETO: automação total NÃO está concluída — é processo em andamento que requer políticas públicas. Todas as demais são verdadeiras conforme o texto da atividade.'},
+{n:7,tag:'Slide 5',ctx:'ELIZA (anos 1960): primeiro chatbot, regras pré-definidas. LLMs (GPT, BERT): pré-treinados com enormes corpora. Word Embedding: vetores em espaço multidimensional.',
+q:'Sobre PLN e LLMs, marque a alternativa CORRETA:',
+opts:['ELIZA pode ser considerado um LLM pois era baseado em redes neurais profundas','Os LLMs como GPT e BERT são treinados com dados genéricos e depois ajustados via fine-tuning','Word Embeddings representam palavras em apenas uma dimensão','O PLN não utiliza técnicas de ML, sendo baseado exclusivamente em regras gramaticais','A técnica N-grama é mais precisa que os LLMs para geração de linguagem'],c:1,
+exp:'B é correta — fine-tuning = pré-treinar + ajustar para domínio. | A: ELIZA era baseada em REGRAS, não redes neurais. | C: Embeddings têm CENTENAS de dimensões. | D: PLN usa extensivamente ML. | E: LLMs são muito mais precisos que N-gram.'},
+{n:8,tag:'Slide 7',ctx:'"Um sistema para distinguir gatos de cachorros onde todos os cachorros são pretos e gatos são brancos aprende a distinguir cor, não o animal." — Ludermir, 2021',
+q:'Sobre o viés nos dados de treinamento, é CORRETO afirmar que:',
+opts:['É um problema de fácil correção, bastando aumentar o número de exemplos','Afeta apenas sistemas de visão computacional','Pode fazer o modelo aprender correlações espúrias, produzindo resultados incorretos e discriminatórios','É eliminado automaticamente pelo algoritmo Backpropagation','Não representa risco ético pois algoritmos são neutros por natureza'],c:2,
+exp:'C é correta — o modelo aprende cor em vez do animal (correlação espúria). | A: NÃO é fácil, precisa de DIVERSIDADE. | B: afeta todos os tipos. | D: Backpropagation NÃO elimina viés. | E: algoritmos refletem os dados — não são neutros.'},
+{n:9,tag:'Slide 1',ctx:'Leis de Asimov: 1ª (não ferir humanos), 2ª (obedecer), 3ª (autopreservar). Lei Zero: não causar dano à humanidade (prioridade máxima). Debates: carros autônomos, discriminação algorítmica.',
+q:'Sobre as Leis de Asimov, é INCORRETO afirmar que:',
+opts:['As Leis foram concebidas em contexto ficcional mas influenciam debates sobre ética em IA','A Lei Zero tem prioridade hierárquica sobre as demais','As Leis de Asimov, por si só, são suficientes para regular juridicamente todos os sistemas de IA','A responsabilização por erros de carros autônomos é uma questão jurídica ainda em aberto','A 3ª Lei estabelece que a autopreservação do robô é subordinada à segurança humana'],c:2,
+exp:'C é INCORRETO: leis de ficção científica NÃO possuem força jurídica. | A, B, D, E são corretas conforme os slides e o texto da atividade.'},
+{n:10,tag:'Slide 2',ctx:'(1) Chatbot que melhora respostas com base no histórico. (2) Sistema de xadrez sem memória de partidas. (3) Agente hipotético que percebe estados emocionais. (4) Robô hipotético com autoconsciência.',
+q:'Classificação de Hintze — os sistemas (1), (2), (3) e (4) são respectivamente:',
+opts:['Reativa, Memória Limitada, Autoconsciente, Teoria da Mente','Memória Limitada, Máquina Reativa, Teoria da Mente, Autoconsciente','Teoria da Mente, Autoconsciente, Memória Limitada, Máquina Reativa','Memória Limitada, Teoria da Mente, Máquina Reativa, Autoconsciente','Autoconsciente, Memória Limitada, Máquina Reativa, Teoria da Mente'],c:1,
+exp:'(1) Melhora com histórico = MEMÓRIA LIMITADA. (2) Sem memória de partidas = MÁQUINA REATIVA. (3) Percebe emoções = TEORIA DA MENTE (hipotética). (4) Autoconsciência = AUTOCONSCIENTE (hipotética).'},
+{n:11,tag:'Slides 5/6',q:'IA Generativa é:',
+opts:['Apenas classificação de dados','Apenas robótica industrial','Sistemas capazes de criar novos conteúdos','Apenas mineração de dados','Apenas gerenciamento de bancos de dados'],c:2,
+exp:'IA Generativa = sistemas que CRIAM novos conteúdos — texto (ChatGPT), imagens (DALL-E), código (Copilot). É uma das principais categorias de aplicação dos LLMs modernos.'},
+{n:12,tag:'Slide 3',q:'O aprendizado por reforço baseia-se em:',
+opts:['Exemplos rotulados com gabarito','Agrupamento de dados por similaridade','Interação agente-ambiente com recompensas e penalidades','Operações de convolução em matrizes','Compressão e reconstrução de dados'],c:2,
+exp:'Reforço = agente interage com ambiente, recebe recompensas por acertos e penalidades por erros, ajustando a estratégia para maximizar o retorno. Tentativa e erro. Exemplo: AlphaGo.'},
+{n:13,tag:'Slide 3',q:'Exemplo de aprendizado NÃO supervisionado:',
+opts:['Regressão linear para prever preços','Classificação de e-mails como spam/não spam','Agrupamento de clientes sem categorias prévias','Reconhecimento de imagens rotuladas','Diagnóstico médico baseado em sintomas classificados'],c:2,
+exp:'Não supervisionado = dados SEM rótulos, buscando padrões ocultos. Agrupamento de clientes sem categorias pré-definidas é o exemplo clássico. As outras alternativas têm dados rotulados = supervisionado.'},
+{n:14,tag:'Slide 3',ctx:'AlphaGo aprendeu observando partidas e jogando contra si mesmo — Aprendizado por Reforço. Go tem mais configurações que átomos no universo — regras manuais são inviáveis.',
+q:'O caso do AlphaGo ilustra a seguinte mudança na construção de sistemas inteligentes:',
+opts:['Substituir hardware por processadores quânticos para calcular todas as jogadas','Programar explicitamente todas as jogadas de Go por regras de especialistas','Abandonar dados e usar raciocínio puramente lógico-dedutivo','Substituir programação explícita de regras pelo aprendizado a partir de exemplos e experiências','Utilizar somente aprendizado supervisionado com rótulos de mestres humanos'],c:3,
+exp:'A mudança fundamental: sair de regras manuais → aprendizado por experiência. No Go, regras manuais são computacionalmente inviáveis. AlphaGo aprendeu via reforço: vitória = recompensa, derrota = punição.'},
+{n:15,tag:'Slide 4',q:'Uma CNN (Rede Neural Convolucional) é especialmente indicada para (repetição intencional):',
+opts:['Compressão de arquivos','Gerenciamento de bancos de dados','Visão computacional e reconhecimento de imagens','Criptografia assimétrica','Modelagem de redes'],c:2,
+exp:'Mesma resposta da Q4 — o professor repetiu de propósito! CNN = visão computacional. A operação de convolução detecta padrões espaciais em matrizes de pixels (bordas, texturas, formas).'},
+
+/* 16-20: Slide 1 aprofundado */
+{n:16,tag:'Slide 1',q:'John McCarthy e sua principal contribuição para a IA:',
+opts:['Desenvolveu o Deep Blue, primeiro computador a vencer campeão de xadrez','Organizou a Conferência de Dartmouth em 1956, onde o termo "Inteligência Artificial" foi cunhado','Criou o Teste de Turing para avaliar a inteligência das máquinas','Desenvolveu o primeiro chatbot da história','Propôs as 4 Leis da Robótica de ficção científica'],c:1,
+exp:'John McCarthy (professor assistente do Dartmouth College) organizou em 1956 a "Conferência de Pesquisa de Verão sobre IA de Dartmouth" — onde o termo "Inteligência Artificial" foi criado pela primeira vez.'},
+{n:17,tag:'Slide 2',q:'O Deep Blue (IBM), que derrotou Kasparov no xadrez, se enquadra em qual categoria de Hintz?',
+opts:['IA de Memória Limitada','IA com Teoria da Mente','Máquina Reativa','IA Autoconsciente','IA Generalizada (AGI)'],c:2,
+exp:'Deep Blue é Máquina Reativa: identificava peças e calculava movimentos mas NÃO aprendia com partidas anteriores. Mesma entrada → sempre mesma saída. Não tinha memória de jogos passados.'},
+{n:18,tag:'Slide 1',q:'Segundo LIMA (2014), um sistema inteligente apresenta capacidades como:',
+opts:['Apenas aprendizado de máquina e processamento de imagens','Apenas comunicação coloquial e jogos estratégicos','Aquisição de conhecimentos, resolução de problemas, reconhecimento de padrões, comunicação em linguagem coloquial e aprendizado','Apenas automação de tarefas repetitivas','Exclusivamente processamento de linguagem natural'],c:2,
+exp:'Lima (2014) lista: aquisição de conhecimentos, planejamento de eventos, resolução de problemas, representações de informações, armazenamento de conhecimento, comunicação coloquial e aprendizado.'},
+{n:19,tag:'Slide 1',q:'A ordem hierárquica correta das Leis de Asimov (maior para menor prioridade):',
+opts:['1ª Lei → 2ª Lei → 3ª Lei → Lei Zero','Lei Zero → 1ª Lei → 2ª Lei → 3ª Lei','3ª Lei → 2ª Lei → 1ª Lei → Lei Zero','Lei Zero → 3ª Lei → 2ª Lei → 1ª Lei','Todas as leis têm prioridade igual'],c:1,
+exp:'Hierarquia: Lei Zero (não causar dano à humanidade) > 1ª Lei (não ferir humano) > 2ª Lei (obedecer ordens) > 3ª Lei (proteger existência). A Lei Zero foi adicionada depois e tem prioridade máxima.'},
+{n:20,tag:'Slide 2',q:'Qual das alternativas NÃO é uma subárea da IA mencionada nos slides?',
+opts:['Processamento de Linguagem Natural (PLN)','Reconhecimento de Fala','Computação Quântica','Visão Computacional','Robótica'],c:2,
+exp:'Computação Quântica não é uma subárea da IA nos slides. As subáreas mencionadas são: PLN/NLP, Reconhecimento de Fala, Visão Computacional, Robótica e Machine Learning/Deep Learning.'},
+
+/* 21-25: Slide 2 aprofundado */
+{n:21,tag:'Slide 2',q:'Machine Learning se diferencia da programação tradicional porque:',
+opts:['Usa apenas Python como linguagem','Sistemas aprendem padrões de dados SEM serem explicitamente programados para cada tarefa','Não utiliza dados de entrada','Requer que o programador defina todas as regras manualmente','É exclusivo para processamento de imagens'],c:1,
+exp:'Na programação tradicional, o programador define regras explícitas. No ML, o sistema aprende padrões a partir de dados e faz previsões sem precisar de regras manuais para cada caso.'},
+{n:22,tag:'Slide 2',q:'Qual alternativa descreve CORRETAMENTE um chatbot?',
+opts:['Sistema que aciona funções em dispositivos inteligentes e realiza pesquisas na internet','Um robô físico que interage com humanos por voz','Robô de conversação baseado em diálogos pré-estabelecidos, usado em e-commerce e atendimento ao cliente','Um modelo de linguagem de grande escala como o GPT-4','Um sistema de reconhecimento facial baseado em CNN'],c:2,
+exp:'Chatbot = robô de conversação com diálogos pré-estabelecidos. Usado em e-commerce, atendimento ao cliente, comunicação interna. Diferente de Assistente Virtual (Siri, Alexa) que aciona funções em dispositivos.'},
+{n:23,tag:'Slide 2',q:'A IA com "Teoria da Mente" na classificação de Hintz seria capaz de:',
+opts:['Executar tarefas sem memória de ações anteriores','Aprender com experiências passadas usando Machine Learning','Compreender e interagir considerando os pensamentos e emoções de outros indivíduos','Ter consciência de si mesma como os seres humanos','Calcular movimentos em jogos de xadrez sem aprender'],c:2,
+exp:'IA com Teoria da Mente: hipotética, teria a capacidade de compreender pensamentos e emoções alheias para definir suas ações. Na Psicologia, "Teoria da Mente" é a capacidade de entender estados mentais de outros.'},
+{n:24,tag:'Slide 2',q:'O que caracteriza uma Máquina Reativa?',
+opts:['Aprende com experiências passadas para melhorar','Possui consciência de si mesma','Não tem memória — sempre produz a mesma saída para a mesma entrada','Compreende as emoções e pensamentos de outros','Usa Deep Learning para aprender padrões complexos'],c:2,
+exp:'Máquinas Reativas: forma mais básica de IA, sem memória, não considera experiências passadas. Mesma entrada → sempre mesma saída. Ex: Deep Blue, sistemas de recomendação simples.'},
+{n:25,tag:'Slide 2',q:'Qual é um exemplo de IA de Memória Limitada?',
+opts:['Deep Blue (IBM) — sistema de xadrez sem memória de partidas','ELIZA — chatbot dos anos 1960 baseado em regras','Siri (Apple) — assistente virtual que aprende com interações','Uma calculadora científica','Uma planilha de cálculos automáticos'],c:2,
+exp:'Siri é IA de Memória Limitada: aprende com experiências passadas e dados novos usando ML. Outros exemplos: Alexa, Google Assistente, carros autônomos. Deep Blue é Máquina Reativa.'},
+
+/* 26-30: Slide 3 aprofundado */
+{n:26,tag:'Slide 3',q:'Overfitting em aprendizado supervisionado ocorre quando:',
+opts:['O modelo não tem dados suficientes para aprender qualquer padrão','O modelo se ajusta muito bem ao treinamento mas não generaliza para dados novos','O modelo aprende muito lentamente','Os dados de treinamento não possuem rótulos','A rede neural tem poucas camadas'],c:1,
+exp:'Overfitting (sobreajuste): o modelo "decora" os dados de treinamento e perde a capacidade de generalizar para dados que nunca viu. É como decorar as respostas de uma prova específica sem entender o conteúdo.'},
+{n:27,tag:'Slide 3',q:'O algoritmo K-means é usado em qual tipo de aprendizado?',
+opts:['Aprendizado Supervisionado','Aprendizado Por Reforço','Aprendizado Não Supervisionado','Deep Learning exclusivamente','Aprendizado Semi-supervisionado'],c:2,
+exp:'K-means é um algoritmo de CLUSTERIZAÇÃO — organiza dados em grupos (clusters) SEM rótulos pré-definidos. É Não Supervisionado. Outros: DBSCAN, Hierarchical Clustering, PCA.'},
+{n:28,tag:'Slide 3',q:'No aprendizado por reforço, o que representa o "ambiente"?',
+opts:['O conjunto de dados rotulados de treinamento','O contexto com que o agente interage, recebendo recompensas ou penalidades pelas ações','A rede neural que processa os dados de entrada','O algoritmo de otimização que ajusta os pesos','O conjunto de regras pré-programadas pelo desenvolvedor'],c:1,
+exp:'No reforço: o AGENTE (modelo) age sobre o AMBIENTE e recebe RECOMPENSAS (ação correta) ou PENALIDADES (ação errada). O ambiente é tudo o que o agente pode observar e no qual pode agir.'},
+{n:29,tag:'Slide 3',q:'O AlphaGo utilizou qual tipo de aprendizado de máquina para derrotar Ke Jie em 2017?',
+opts:['Aprendizado Supervisionado','Aprendizado Não Supervisionado','Aprendizado por Reforço','Deep Learning sem aprendizado','Apenas regras programadas por especialistas'],c:2,
+exp:'AlphaGo usou Aprendizado por Reforço: observou partidas humanas e jogou milhares de vezes contra si mesmo, recebendo recompensas por vitórias e punições por derrotas. Go é complexo demais para regras manuais.'},
+{n:30,tag:'Slide 3',q:'Um filtro de spam treinado com e-mails marcados como "spam" ou "não spam" usa qual paradigma?',
+opts:['Aprendizado Não Supervisionado','Aprendizado Por Reforço','Aprendizado Supervisionado','Aprendizado Auto-supervisionado','Clusterização'],c:2,
+exp:'Supervisionado: os e-mails têm RÓTULOS ("spam" ou "não spam") = gabarito. O modelo aprende a mapear e-mails → classificação com base nesses exemplos rotulados.'},
+
+/* 31-35: Slide 4 aprofundado */
+{n:31,tag:'Slide 4',q:'A arquitetura Transformer, base dos LLMs modernos, se destaca pelo:',
+opts:['Loops que permitem que a saída volte como entrada','Mecanismo de "atenção" que foca em partes relevantes do texto e processamento paralelo','Operação de convolução para padrões espaciais em imagens','Compressão de dados em representação menor','Uso exclusivo de camadas lineares'],c:1,
+exp:'Transformers: mecanismo de "atenção" permite ao modelo focar em partes mais relevantes do texto. Processamento PARALELO (diferente de RNNs que processam sequencialmente). Base do ChatGPT, BERT e demais LLMs.'},
+{n:32,tag:'Slide 4',q:'Redes LSTM são especialmente usadas para:',
+opts:['Reconhecimento de padrões em imagens estáticas','Compressão de dados binários','Tarefas que exigem lembrar informações por longos períodos — reconhecimento de voz e tradução automática','Criação de imagens artificiais em competição com um discriminador','Segmentação de clientes sem categorias prévias'],c:2,
+exp:'LSTM (Long Short-Term Memory): variação de RNN com "portas" (gates) que controlam quais informações lembrar, descartar ou passar adiante. Ideal para sequências longas com dependências temporais.'},
+{n:33,tag:'Slide 4',q:'Em uma GAN (Rede Adversária Generativa), qual é a função da rede discriminadora?',
+opts:['Gerar novos dados semelhantes aos dados de treinamento','Tentar distinguir os dados gerados (falsos) dos dados reais','Comprimir dados em representação menor','Calcular pesos de atenção entre tokens','Detectar padrões espaciais com convolução'],c:1,
+exp:'GAN tem duas redes em competição: GERADORA (cria dados falsos tentando enganar) e DISCRIMINADORA (tenta distinguir real de falso). A competição entre elas melhora a qualidade dos dados gerados.'},
+{n:34,tag:'Slide 4',q:'Qual é a principal diferença entre CNN e RNN?',
+opts:['CNN usa funções de ativação; RNN não','CNN é para texto; RNN para imagens','CNN detecta padrões espaciais em imagens; RNN tem loops/memória para processar sequências','CNN é não supervisionada; RNN é supervisionada','CNN tem mais camadas que RNN por definição'],c:2,
+exp:'CNN (Convolucional): detecta padrões ESPACIAIS em imagens via operação de convolução. RNN (Recorrente): tem LOOPS, a saída pode ser reutilizada como entrada, criando "memória" para processar SEQUÊNCIAS.'},
+{n:35,tag:'Slide 4',q:'Qual é a função da camada de SAÍDA em uma rede neural?',
+opts:['Receber os dados brutos externos','Processar e extrair características com conexões ponderadas','Fornecer o resultado final do modelo após todo o processamento','Ajustar os pesos durante o treinamento','Aplicar convolução para detectar bordas'],c:2,
+exp:'Camada de SAÍDA: fornece o resultado final do modelo. É a última camada. Ex: em classificação de imagens, a saída indica a categoria ("gato", "cachorro"). A camada de ENTRADA recebe os dados brutos.'},
+
+/* 36-45: Slides 5+6 aprofundado */
+{n:36,tag:'Slide 5',q:'O nome "ELIZA" para o primeiro chatbot foi inspirado em:',
+opts:['Elizabeth II, rainha da Inglaterra na época','Eliza Doolittle, personagem da peça "Pigmalião" de George Bernard Shaw (1913)','Eliza Hamilton, matemática que contribuiu para a IA','Uma sigla para Electronic Language Intelligence','Eliza, filha do desenvolvedor do software'],c:1,
+exp:'ELIZA = nome da personagem principal da peça "Pigmalião" de George Bernard Shaw (1913) — Eliza Doolittle. O chatbot foi desenvolvido nos anos 1960 e simulava conversa entre paciente e psicólogo.'},
+{n:37,tag:'Slide 5',q:'A técnica N-gram é classificada como:',
+opts:['Arquitetura de rede neural profunda com múltiplas camadas','Técnica de modelagem probabilística que mede frequência de palavras para prever a próxima','Algoritmo de aprendizado por reforço aplicado à linguagem','Método de compressão de vetores de embedding','Variação do Transformer com atenção bidirecional'],c:1,
+exp:'N-gram: técnica probabilística que analisa grandes textos medindo frequência de palavras (ou grupos de N palavras) para prever qual palavra virá a seguir com base nas imediatamente anteriores.'},
+{n:38,tag:'Slide 5',q:'O Word2Vec foi apresentado em 2013 pelo Google. Quem foi o autor principal mencionado nos slides?',
+opts:['Geoffrey Hinton','Yoshua Bengio','Mikolov','Alan Turing','John McCarthy'],c:2,
+exp:'Word2Vec (2013, Google): artigo de Mikolov e sua equipe. Revolucionou os word embeddings — representa palavras como vetores em espaço multidimensional onde palavras similares ficam próximas.'},
+{n:39,tag:'Slide 5',q:'No Word2Vec, a técnica Skip-Gram funciona assim:',
+opts:['Dado o contexto ao redor, prevê a palavra central','Comprime palavras em um vetor único de baixa dimensão','Dada uma palavra central, prevê as palavras do contexto ao redor','Analisa apenas pares de palavras adjacentes','Cria embeddings usando Transformer bidirecional'],c:2,
+exp:'Skip-gram: dada a PALAVRA central → prevê o CONTEXTO. É o OPOSTO do CBOW (que dado o CONTEXTO → prevê a PALAVRA). Exemplo: dada "Brasil" → prevê "futebol", "país", "oportunidades".'},
+{n:40,tag:'Slides 5/6',q:'O ChatGPT foi lançado em:',
+opts:['Janeiro de 2020','Março de 2021','Novembro de 2022','Junho de 2023','Fevereiro de 2024'],c:2,
+exp:'ChatGPT: lançado em novembro de 2022 pela OpenAI. Em fevereiro de 2023 (2 meses depois) já tinha 100 milhões de usuários — quebrando o recorde do TikTok que levou 9 meses para a mesma marca.'},
+{n:41,tag:'Slides 5/6',q:'Qual é a principal diferença entre GPT e BERT?',
+opts:['GPT usa Transformer; BERT usa RNN','GPT é bidirecional; BERT é unidirecional','GPT é unidirecional (só contexto anterior); BERT é bidirecional (contexto anterior e posterior)','GPT foi feito pelo Google; BERT pela OpenAI','GPT gera imagens; BERT gera apenas texto'],c:2,
+exp:'GPT (OpenAI, 2018): UNIDIRECIONAL — considera apenas o contexto anterior para prever o próximo token. BERT (Google, 2018): BIDIRECIONAL — usa Masked Language Models e considera os dois lados da frase.'},
+{n:42,tag:'Slides 5/6',q:'GPT é uma sigla para:',
+opts:['Generalized Processing Technology','Generative Pre-trained Transformer','Global Predictive Training','Graph Processing Tool','Generated Pattern Training'],c:1,
+exp:'GPT = Generative (Generativo) + Pre-trained (Pré-treinado) + Transformer (arquitetura). O "G" indica que gera novos conteúdos. "P" indica que passou por treinamento inicial. "T" é a arquitetura base.'},
+{n:43,tag:'Slide 5',q:'Word Embeddings representam palavras como vetores em:',
+opts:['Apenas uma dimensão — um número único','Duas dimensões, como coordenadas cartesianas','Três dimensões, como coordenadas 3D','Centenas de dimensões — quanto mais, melhor a representação','Dimensão variável igual ao tamanho do vocabulário'],c:3,
+exp:'Word Embeddings têm CENTENAS de dimensões. Cada dimensão captura um aspecto semântico diferente. Exemplo: uma dimensão para "transporte" (avião próximo de trem), outra para "atividades" (avião próximo de voar).'},
+{n:44,tag:'Slides 5/6',q:'Durante o treinamento de LLMs, quais tipos de dados são utilizados?',
+opts:['Apenas dados médicos e científicos de alta qualidade','Exclusivamente textos de redes sociais','Grandes quantidades de textos variados: artigos, livros, Wikipedia, diálogos e outros conteúdos da internet','Somente textos em inglês','Apenas dados estruturados em tabelas'],c:2,
+exp:'LLMs são treinados com enormes quantidades de textos variados de toda a internet: artigos, livros, páginas da Wikipedia, diálogos, fóruns. Depois podem ser ajustados (fine-tuning) para tarefas específicas.'},
+{n:45,tag:'Slides 5/6',q:'Fine-tuning em LLMs consiste em:',
+opts:['Treinar um modelo do zero para uma tarefa específica','Ajustar um modelo pré-treinado com dados genéricos para uma tarefa ou domínio específico','Remover camadas do modelo para reduzir tamanho','Aumentar o número de parâmetros do modelo','Substituir Transformers por RNNs mais simples'],c:1,
+exp:'Fine-tuning: pegar um LLM já pré-treinado com dados genéricos (Wikipédia, livros) e ajustá-lo com dados específicos do domínio desejado. Reduz drasticamente o tempo e custo de treinamento.'},
+
+/* 46-50: Slide 7 aprofundado */
+{n:46,tag:'Slide 7',q:'Zero-Shot Prompting é mais adequado para:',
+opts:['Tarefas complexas com raciocínio em múltiplos passos','Tarefas onde o modelo precisa seguir formato muito específico','Tarefas simples e claras onde o modelo entende a instrução sem exemplos','Problemas matemáticos que exigem demonstração de raciocínio','Adaptação a estilo de escrita específico'],c:2,
+exp:'Zero-Shot: instrução direta SEM exemplos. Funciona bem quando a tarefa é simples e o modelo já tem o conhecimento necessário. Ex: "Traduza: Bom dia" — sem precisar mostrar exemplos de tradução.'},
+{n:47,tag:'Slide 7',q:'Few-Shot Prompting envolve fornecer ao modelo:',
+opts:['Nenhum exemplo antes da instrução','1 a 5 exemplos antes da instrução principal para mostrar o formato esperado','Mais de 100 exemplos para treinar do zero','Apenas a instrução final sem contexto','Dados rotulados para fine-tuning'],c:1,
+exp:'Few-Shot: fornece de 1 a 5 exemplos (shots) antes da instrução principal. Ajuda o modelo a entender o padrão, formato ou estilo esperado. Útil para tarefas ambíguas ou com estilo específico.'},
+{n:48,tag:'Slide 7',q:'Chain-of-Thought Prompting melhora o desempenho principalmente em:',
+opts:['Tradução simples entre idiomas','Tarefas complexas que exigem raciocínio passo a passo, como problemas matemáticos','Geração de imagens a partir de texto','Compressão de textos longos','Classificação de documentos por categoria'],c:1,
+exp:'Chain-of-Thought: instrui o modelo a pensar em voz alta e raciocinar passo a passo antes de dar a resposta final. Melhora muito problemas de lógica, matemática e análise de múltiplos fatores.'},
+{n:49,tag:'Slide 7',q:'Um prompt eficaz é composto por:',
+opts:['Apenas a pergunta direta ao modelo','Instrução + contexto + resposta esperada (elementos implícitos ou explícitos)','Somente exemplos de respostas anteriores','Regras gramaticais do idioma','Apenas histórico de conversas'],c:1,
+exp:'Um prompt bem construído inclui: INSTRUÇÃO (o que fazer), CONTEXTO (informações relevantes) e RESPOSTA ESPERADA (formato/estilo desejado). Esses elementos podem ser explícitos ou implícitos.'},
+{n:50,tag:'Slide 7',q:'O artigo que originou os conceitos de Zero-Shot, One-Shot e Few-Shot, relacionado ao GPT-3, tem como título:',
+opts:['Attention is All You Need','Chain-of-Thought Prompting Elicits Reasoning in Large Language Models','Language Models are Few-Shot Learners','BERT: Pre-training of Deep Bidirectional Transformers','Computing Machinery and Intelligence'],c:2,
+exp:'"Language Models are Few-Shot Learners" — artigo da OpenAI sobre o GPT-3. Define "shot" como um exemplo ou amostra de aprendizado. "Zero-shot" = zero exemplos. "Few-shot" = poucos exemplos.'},
+
+/* 51-55: Tópicos extras da atividade */
+{n:51,tag:'Slide 7',q:'O viés nos dados de treinamento é problemático porque:',
+opts:['Aumenta o tempo de processamento dos algoritmos','Faz o modelo aprender correlações espúrias, produzindo resultados incorretos e potencialmente discriminatórios','Reduz o número de parâmetros da rede neural','Impede o uso de Deep Learning','Só afeta visão computacional'],c:1,
+exp:'Viés nos dados: o modelo aprende padrões incorretos (correlações espúrias). Ex: todos os cachorros são pretos → aprende a distinguir cor, não animal. Isso leva a discriminação em crédito, RH, reconhecimento facial.'},
+{n:52,tag:'Slide 4',q:'O algoritmo Backpropagation é responsável por:',
+opts:['Eliminar o viés nos dados automaticamente','Ajustar os pesos das conexões da rede propagando o erro de volta pelas camadas','Criar embeddings de palavras para LLMs','Gerar dados sintéticos para aumentar o conjunto de treino','Detectar e remover outliers dos dados'],c:1,
+exp:'Backpropagation (retropropagação): algoritmo que calcula o gradiente do erro e propaga de volta pelas camadas para ajustar os pesos. É o mecanismo de aprendizado das redes neurais — NÃO elimina viés.'},
+{n:53,tag:'Slides 5/6',q:'Qual é um exemplo de IA Generativa?',
+opts:['DeepFace — reconhecimento facial do Facebook','AlphaGo — sistema para jogar Go','DALL-E — gera imagens a partir de descrições textuais','Deep Blue — sistema de xadrez da IBM','K-means — algoritmo de clusterização'],c:2,
+exp:'DALL-E (OpenAI) gera NOVAS imagens a partir de texto — isso é IA Generativa. ChatGPT gera texto. GitHub Copilot gera código. DeepFace, AlphaGo, Deep Blue são IAs de classificação/decisão, não generativas.'},
+{n:54,tag:'Slide 7',q:'O caso Knight Capital Group (2012) ilustra:',
+opts:['Os benefícios da IA na otimização financeira','Os riscos de sistemas automatizados irresponsáveis em domínios críticos — US$ 460 milhões perdidos em um dia','A capacidade da IA de superar humanos no mercado financeiro','O surgimento do aprendizado por reforço aplicado a finanças','A importância do fine-tuning em LLMs para o setor bancário'],c:1,
+exp:'Knight Capital: bug de software causou perda de US$ 460 milhões em UM único dia na Bolsa de NY (2012). É um dos maiores erros de programação da história — usado para ilustrar riscos de IA em domínios críticos.'},
+{n:55,tag:'Slide 7',q:'A LGPD (Lei Geral de Proteção de Dados) no contexto da IA serve para:',
+opts:['Regular uso de armas autônomas no Brasil','Garantir que empresas usem modelos open source','Regular uso de dados pessoais e endereçar preocupações de privacidade no contexto da IA','Proibir algoritmos de ML em processos judiciais','Estabelecer normas para desenvolvimento de AGI'],c:2,
+exp:'LGPD: regula a coleta, armazenamento e uso de dados pessoais no Brasil. No contexto da IA, endereça preocupações com privacidade e uso responsável de dados. Complementada por projetos de lei específicos para IA.'},
+
+/* 56-65: Pegadinhas conceituais */
+{n:56,tag:'Slide 1',trap:true,q:'PEGADINHA — A ASI (Superinteligência Artificial) já existe e está sendo usada em laboratórios. Esta afirmação é:',
+opts:['Verdadeira — a DeepMind confirmou que já possui uma ASI em testes','Verdadeira — ChatGPT e Gemini são exemplos de ASI','Falsa — ASI é conceito HIPOTÉTICO. Hoje só ANI existe. AGI e ASI ainda não foram alcançadas','Verdadeira — ASI existe mas não é divulgada ao público','Verdadeira — qualquer IA que supere humanos em uma tarefa é ASI'],c:2,
+exp:'FALSA. ASI é puramente hipotética — não existe. Representa uma IA que superaria humanos em TUDO (criatividade, emoções, ciência). O que temos hoje é ANI. AGI (equivalente humano) também não existe ainda.'},
+{n:57,tag:'Slide 1',trap:true,q:'PEGADINHA — A diferença fundamental entre ANI e AGI é:',
+opts:['ANI usa Deep Learning; AGI usa ML superficial','ANI é treinada para UMA tarefa específica; AGI (hipotética) teria inteligência aplicável a qualquer tarefa cognitiva humana','ANI existe no futuro; AGI é a IA atual','ANI usa regras manuais; AGI usa reforço','ANI processa texto; AGI processa imagens'],c:1,
+exp:'ANI (Narrow): especializada em UMA coisa, não generaliza. Ex: AlphaGo joga Go mas não sabe cozinhar. AGI (General): hipotética, aplicaria inteligência a QUALQUER tarefa como humanos fazem. Hoje só ANI existe.'},
+{n:58,tag:'Slide 4',trap:true,q:'PEGADINHA — Deep Learning requer redes neurais com:',
+opts:['Apenas uma camada de entrada e uma de saída','Exatamente 2 camadas ocultas intermediárias','3 ou mais camadas intermediárias ocultas','Camadas ocultas apenas em problemas com imagens','O máximo possível de neurônios em uma única camada'],c:2,
+exp:'Deep Learning = redes com 3 OU MAIS camadas ocultas. A "profundidade" vem do número de camadas intermediárias. Com mais camadas, a rede aprende representações progressivamente mais abstratas e complexas.'},
+{n:59,tag:'Slide 4',trap:true,q:'PEGADINHA — Nas redes Feedforward, os dados:',
+opts:['Fluem bidirecional — para frente e para trás entre camadas','Formam loops — saída pode voltar como entrada do mesmo neurônio','Fluem APENAS para frente: entrada → camadas ocultas → saída, sem loops','Fluem paralelamente em múltiplos caminhos independentes','Fluem aleatoriamente entre quaisquer camadas'],c:2,
+exp:'Feedforward: dados fluem SOMENTE para frente (da entrada para a saída), SEM loops. É o tipo mais básico de RNA. RNNs têm loops. CNNs têm convolução. Feedforward = sentido único.'},
+{n:60,tag:'Slide 4',trap:true,q:'PEGADINHA — AutoEncoders: qual é a função do Decoder?',
+opts:['Comprimir os dados em representação de menor dimensão','Receber dados brutos e convertê-los para numéricos','Receber a representação codificada e tentar reconstruir os dados originais','Calcular pesos de atenção entre tokens de entrada','Gerar dados sintéticos em competição com um discriminador'],c:2,
+exp:'AutoEncoder: ENCODER comprime os dados → DECODER reconstrói os dados originais a partir da versão comprimida. O objetivo é que a saída seja o mais próxima possível da entrada. Útil para detecção de anomalias.'},
+{n:61,tag:'Slide 5',trap:true,q:'PEGADINHA — O projeto ELIZA pode ser considerado um LLM pois também simulava conversas convincentes. Esta afirmação é:',
+opts:['Verdadeira — ELIZA foi o primeiro LLM da história','Verdadeira — qualquer chatbot convincente é um LLM','Falsa — ELIZA era baseada em REGRAS pré-definidas, não em redes neurais profundas treinadas com grandes volumes de dados','Falsa — ELIZA não simulava conversas, apenas processava comandos','Verdadeira — ELIZA usava a mesma tecnologia do ChatGPT, mas em hardware limitado'],c:2,
+exp:'FALSA! ELIZA (anos 1960) era baseada em REGRAS pré-definidas — sem redes neurais, sem aprendizado, sem grandes dados. LLMs modernos usam Transformers, treinam com bilhões de textos e aprendem padrões. São conceitos completamente diferentes.'},
+{n:62,tag:'Slide 1',trap:true,q:'PEGADINHA — O AlphaGo venceu Ke Jie em 2017, demonstrando inteligência superior à humana em Go. Portanto, é um exemplo de AGI. Esta afirmação é:',
+opts:['Verdadeira — qualquer IA que supere humanos é AGI','Verdadeira — Go é tão complexo que só AGI poderia vencê-lo','Falsa — AlphaGo é ANI: extraordinariamente especializado em Go mas incapaz de aprender ou raciocinar em outras áreas','Falsa — AlphaGo não venceu nenhum campeão humano','Verdadeira — a DeepMind confirmou que AlphaGo possui inteligência geral'],c:2,
+exp:'FALSA. AlphaGo é ANI (Estreita). Venceu Ke Jie no Go mas não sabe fazer mais NADA além de jogar Go. AGI teria inteligência aplicável a QUALQUER tarefa. Ser excelente em uma tarefa = ANI, não AGI.'},
+{n:63,tag:'Slide 1',trap:true,q:'PEGADINHA — Se um sistema de IA passa no Teste de Turing, significa que:',
+opts:['A máquina possui consciência e aprendizado equivalente ao humano','A máquina é capaz de realizar qualquer tarefa cognitiva (AGI)','A máquina demonstra comportamento indistinguível do humano em conversa textual, mas isso NÃO implica consciência','A máquina superou todos critérios para ser considerada inteligente','A máquina está pronta para ser classificada como ASI'],c:2,
+exp:'Passar no Teste de Turing = comportamento EXTERNO indistinguível. NÃO implica consciência, emoções reais ou aprendizado equivalente ao humano. Pesquisadores alertam: sistemas modernos passam no teste mas não "pensam" como humanos.'},
+{n:64,tag:'Slides 5/6',trap:true,q:'PEGADINHA — Yoshua Bengio contribuiu para PLN ao:',
+opts:['Criar o algoritmo Backpropagation em 1986','Projetar nos anos 2000 o primeiro modelo de rede neural especificamente para processamento de linguagem','Desenvolver o algoritmo K-means para clustering','Criar o Deep Blue que derrotou Kasparov','Inventar o mecanismo de atenção dos Transformers'],c:1,
+exp:'Yoshua Bengio: no início dos anos 2000, com colaboradores, projetou o primeiro modelo de rede neural especificamente para PLN — foi um marco significativo na evolução dos modelos de linguagem.'},
+{n:65,tag:'Slides 5/6',trap:true,q:'PEGADINHA — O ChatGPT bateu qual recorde ao atingir 100 milhões de usuários?',
+opts:['Facebook — que levou 4 anos','Instagram — que levou 2 anos','TikTok — que levou 9 meses; ChatGPT fez em 2 meses','WhatsApp — que levou 6 meses; ChatGPT fez em 1 mês','YouTube — que levou 3 anos; ChatGPT fez em 6 meses'],c:2,
+exp:'ChatGPT (lançado nov/2022): atingiu 100 milhões de usuários em 2 meses (fev/2023), quebrando o recorde do TikTok que levou 9 meses para a mesma marca. Demonstra o impacto dos LLMs no mercado.'}
+]
+
+// ═════ QUIZ ═════
+let qS=false,qC=0,qSel=null,qShow=false,qSc=0,qAns=[]
+const LTRS=['A','B','C','D','E']
+
+function initQ(){qS=true;renderQ()}
+
+function renderQ(){
+  if(qAns.length===QQ.length){renderQDone();return}
+  const q=QQ[qC]
+  const pct=Math.round((qC/QQ.length)*100)
+  document.getElementById('qprog').style.width=pct+'%'
+  let ctx=q.ctx?`<div class="qctx">${q.ctx}</div>`:''
+  let trap=q.trap?`<span class="qtrap">⚡ PEGADINHA</span>`:''
+  let opts=q.opts.map((o,i)=>{
+    let cl='opt'
+    if(qShow){if(i===q.c)cl+=' c';else if(i===qSel&&i!==q.c)cl+=' w'}
+    return `<button class="${cl}" onclick="qAns2(${i})" ${qShow?'disabled':''}><span class="olet">${LTRS[i]}</span><span>${o}</span></button>`
+  }).join('')
+  let exp=qShow?`<div class="exp ${qSel===q.c?'c':'w'}"><span class="elabel">${qSel===q.c?'✅ Correto!':'❌ Errado — confira:'}</span>${q.exp}</div>`:''
+  document.getElementById('qcontent').innerHTML=`
+  <div class="qcard">
+    <div class="qmeta">
+      <span class="qnum">#${String(qC+1).padStart(2,'0')} / ${QQ.length}</span>
+      <span class="qbadge" style="background:#58a6ff15;color:#58a6ff;border:1px solid #58a6ff30">${q.tag}</span>
+      ${trap}
+    </div>
+    <div class="qtext">${q.q}</div>
+    ${ctx}
+    <div class="opts">${opts}</div>
+    ${exp}
+  </div>
+  <div class="qnav">
+    <span class="smini">✅ ${qSc} / ${qC} corretas</span>
+    ${qShow?`<button class="btn btn-gr" onclick="qNext()">${qC<QQ.length-1?'Próxima →':'Ver resultado'}</button>`:`<button class="btn" disabled style="background:var(--s2);color:var(--mu)">Selecione uma opção</button>`}
+  </div>`
+}
+
+function qAns2(i){
+  if(qShow)return
+  qSel=i;qShow=true
+  if(i===QQ[qC].c)qSc++
+  qAns.push({ok:i===QQ[qC].c})
+  renderQ()
+}
+function qNext(){
+  if(qC<QQ.length-1){qC++;qSel=null;qShow=false;renderQ()}
+  else renderQDone()
+}
+function renderQDone(){
+  document.getElementById('qcontent').style.display='none'
+  document.getElementById('qdone').style.display='block'
+  document.getElementById('qprog').style.width='100%'
+  const p=qSc/QQ.length
+  let msg,col
+  if(p>=.9){msg='🏆 Excelente domínio do conteúdo!';col='#3fb950'}
+  else if(p>=.75){msg='👍 Muito bom! Revise os erros e tá pronto.';col='#58a6ff'}
+  else if(p>=.6){msg='📚 Bom! Atenção nas pegadinhas e tópicos errados.';col='#d29922'}
+  else if(p>=.5){msg='⚠️ Metade certa — releia o Resumão!';col='#ffa657'}
+  else{msg='💪 Vai no Resumão, estuda os pontos fracos e tenta de novo!';col='#f85149'}
+  const rev=qAns.map((a,i)=>`<div class="rev-item"><div class="rdot" style="background:${a.ok?'#3fb950':'#f85149'}"></div><span style="color:var(--mu);font-family:monospace;min-width:28px">#${String(i+1).padStart(2,'0')}</span><span style="${!a.ok?'color:#ff7b72':''}">${QQ[i].q.replace(/^PEGADINHA — /,'').substring(0,70)}…</span></div>`).join('')
+  document.getElementById('qdone').innerHTML=`
+  <div class="done">
+    <div style="font-size:1.8rem">📊</div>
+    <div class="done-score" style="color:${col}">${qSc}/${QQ.length}</div>
+    <div class="done-lbl">${Math.round(p*100)}% · ${qSc} corretas · ${QQ.length-qSc} erradas</div>
+    <div class="done-msg" style="color:${col}">${msg}</div>
+    <button class="btn btn-mu" onclick="qReset()">🔄 Tentar novamente</button>
+    <div class="rev"><h3>// revisão_rápida.log</h3>${rev}</div>
+  </div>`
+}
+function qReset(){qC=0;qSc=0;qSel=null;qShow=false;qAns=[];document.getElementById('qcontent').style.display='block';document.getElementById('qdone').style.display='none';renderQ()}
+
+// ═════ DISCURSIVAS ═════
+const DD=[
+  {id:1,q:'Explique o Teste de Turing: quem o propôs, quando, em que artigo, e o que ele avalia. Por que passar no teste NÃO garante que a máquina tem consciência?',tip:'Mencione: nome, ano, artigo, como funciona o teste (juiz + humano + máquina + texto), e a limitação.',
+  pts:['Alan Turing propôs em 1950','Artigo: "Computing Machinery and Intelligence"','Juiz humano conversa por texto com humano e máquina sem saber qual é qual','Se o juiz não distinguir → máquina demonstra comportamento inteligente','Passar NÃO implica consciência ou aprendizado equivalente ao humano','O teste avalia comportamento externo, não inteligência interna'],
+  fb:{ok:'Perfeito. Cobriu todos os pontos com precisão.',par:'Boa resposta. Detalhe mais a limitação do teste (consciência ≠ comportamento).',er:'Estude Slide 1 → Teste de Turing. Foco: quem, quando, como funciona, limitação.'}},
+  {id:2,q:'Liste as 4 Leis da Robótica de Asimov em ordem (incluindo a Lei Zero). Qual é a hierarquia? Por que essas leis NÃO são suficientes para regulamentar a IA real?',tip:'4 leis numeradas, relação de prioridade, e contexto ficcional.',
+  pts:['1ª: robô não pode ferir nem deixar humano sofrer dano','2ª: robô deve obedecer, exceto se conflitar com a 1ª','3ª: robô protege existência, exceto se conflitar com 1ª ou 2ª','Lei Zero: robô não pode causar dano à HUMANIDADE — prioridade MÁXIMA','Hierarquia: Lei Zero > 1ª > 2ª > 3ª','São leis de ficção científica — sem força jurídica no mundo real'],
+  fb:{ok:'Excelente. Domina leis e hierarquia.',par:'Confira o que faltou. Hierarquia e contexto ficcional são pontos frequentes.',er:'Vá ao Resumão (Slide 1 → 4 Leis) e reescreva cada lei.'}},
+  {id:3,q:'Defina Inteligência Artificial citando pelo menos um autor dos slides pelo sobrenome e ano. Quais capacidades caracterizam um sistema inteligente?',tip:'O professor cobra citação de autor. Mencione Carraro (2023) ou Lima (2014).',
+  pts:['IA é campo da Ciência da Computação','Cria sistemas que realizam tarefas que normalmente exigiriam inteligência humana','Capacidades: aprender, raciocinar, tomar decisões, resolver problemas, reconhecer padrões','Menciona CARRARO (2023) ou LIMA (2014)','Inclui comunicação em linguagem natural e armazenamento de conhecimento'],
+  fb:{ok:'Ótimo. Especialmente por citar o autor.',par:'Inclua um autor pelo nome: "Segundo Carraro (2023)..."',er:'Estude Slide 1 → Definição de IA. Mencione pelo menos 1 autor.'}},
+  {id:4,q:'Como Arend Hintz classifica as IAs por funcionalidade? Liste as 4 categorias, defina cada uma e dê um exemplo (real ou hipotético) para cada.',tip:'4 categorias em ordem crescente de complexidade. As 2 últimas são hipotéticas.',
+  pts:['1. Máquinas Reativas: sem memória, mesma saída. Ex: Deep Blue','2. Memória Limitada: aprende com passado. Ex: carros autônomos, Siri','3. Teoria da Mente: HIPOTÉTICA, compreende emoções alheias','4. Autoconsciente: HIPOTÉTICA, a mais avançada, consciência de si mesma','As duas últimas não existem ainda'],
+  fb:{ok:'Excelente. Domina a classificação de Hintz completa.',par:'Verifique se indicou quais são hipotéticas.',er:'Vá ao Resumão (Slide 2 → Hintz) e estude os 4 tipos.'}},
+  {id:5,q:'Explique e diferencie os 3 tipos de aprendizado de máquina: supervisionado, não-supervisionado e por reforço. Dê um exemplo real de cada.',tip:'Para cada tipo: como os dados são fornecidos, como o modelo aprende, exemplo.',
+  pts:['Supervisionado: dados rotulados (gabarito). Ex: spam/não-spam','Não-supervisionado: dados SEM rótulos. Ex: segmentação de clientes','Por reforço: recompensas e penalidades, tentativa e erro. Ex: AlphaGo','Diferença clara entre os 3 tipos no modo de aprendizado'],
+  fb:{ok:'Perfeito. Entende as diferenças e sabe exemplificar.',par:'Certifique-se que cada tipo tem exemplo claro e diferença explicada.',er:'Estude Slide 3. Foco: o que diferencia cada tipo.'}},
+  {id:6,q:'O que são LLMs? Defina com suas palavras, explique como funcionam e cite pelo menos 3 exemplos dos slides.',tip:'Mencione: o que são, como treinados, o que preveem, e os exemplos.',
+  pts:['LLM = modelo de IA treinado com grande quantidade de textos','Aprende a prever a próxima palavra (modelo probabilístico)','Usa redes neurais (Transformers) e aprende padrões da linguagem humana','3+ exemplos: GPT/ChatGPT, Gemini, Llama, BERT, LaMDA'],
+  fb:{ok:'Ótimo. Sabe definir, explicar e exemplificar LLMs.',par:'Citou pelo menos 3 exemplos corretos e explicou como funcionam?',er:'Estude Slides 5+6. Foco: definição, funcionamento e exemplos.'}},
+  {id:7,q:'O que foi o projeto ELIZA? Quando surgiu? O que simulava? Por que é marco histórico? Por que NÃO pode ser considerada um LLM?',tip:'Época, o que fazia, nome de onde veio, diferença para LLMs.',
+  pts:['ELIZA: primeiro chatbot (software de simulação de diálogos)','Surgiu nas décadas de 1950-1960','Simulava conversa paciente–psicólogo','Nome vem de Eliza Doolittle da peça Pigmalião de George Bernard Shaw (1913)','ELIZA era baseada em REGRAS, não em redes neurais profundas'],
+  fb:{ok:'Excelente. Domina o ELIZA completamente.',par:'Explicou por que ELIZA não é LLM? (regras vs redes neurais)',er:'Veja Slides 5+6 → ELIZA. Pontos: quando, o que fazia, nome, diferença para LLM.'}},
+  {id:8,q:'Defina e diferencie ANI, AGI e ASI. Quais existem atualmente? Dê 2 exemplos de ANI e explique por que AlphaGo e Netflix são ANI e não AGI.',tip:'Explique cada sigla, quais são reais vs hipotéticas, e justifique os exemplos.',
+  pts:['ANI (Estreita): tarefa específica. É a IA de HOJE','AGI (Geral): HIPOTÉTICA, inteligência similar à humana em qualquer tarefa','ASI (Superinteligente): HIPOTÉTICA, ultrapassaria humanos em tudo','Atualmente só ANI existe — AGI e ASI são conceitos hipotéticos','Exemplos ANI: Alexa, Netflix, DeepFace, AlphaGo (qualquer 2)','AlphaGo/Netflix são ANI porque fazem UMA coisa — não generalizam'],
+  fb:{ok:'Perfeito. Entende a distinção e justifica os exemplos.',par:'O ponto mais cobrado: por que AlphaGo é ANI? (só joga Go, não generaliza).',er:'Estude Slide 1 → ANI/AGI/ASI. Atenção: AlphaGo e Netflix são ANI.'}}
+]
+
+let dS=false,dEval={},dDone=0
+function initD(){
+  dS=true
+  document.getElementById('disc-questions').innerHTML=DD.map(d=>`
+  <div class="dcard" id="dc-${d.id}">
+    <div class="dnum">// discursiva_${String(d.id).padStart(2,'0')}.txt</div>
+    <div class="dq">${d.q}</div>
+    <div class="dtip">💡 ${d.tip}</div>
+    <textarea id="ta-${d.id}" placeholder="Escreva com suas próprias palavras..." oninput="chkBtn(${d.id})"></textarea>
+    <div class="dbtnrow">
+      <button class="btn btn-yw" id="btn-g-${d.id}" onclick="showG(${d.id})" disabled>🔍 Ver gabarito</button>
+      <span class="gabhint" id="gh-${d.id}">Escreva ao menos 40 caracteres</span>
+    </div>
+    <div class="gabarito" id="gb-${d.id}">
+      <div class="gab-title">// pontos_chave_esperados.md</div>
+      ${d.pts.map(p=>`<div class="gab-item">${p}</div>`).join('')}
+    </div>
+    <div class="selfeval" id="se-${d.id}">
+      <div class="se-title">Como você avalia sua resposta?</div>
+      <div class="se-row">
+        <button class="se-btn se-ok" onclick="rate(${d.id},'ok')">✅ Acertei</button>
+        <button class="se-btn se-par" onclick="rate(${d.id},'par')">⚠️ Parcial</button>
+        <button class="se-btn se-er" onclick="rate(${d.id},'er')">❌ Errei</button>
+      </div>
+    </div>
+    <div class="dfeedback" id="df-${d.id}"></div>
+  </div>`).join('')
+}
+function chkBtn(id){
+  const ok=document.getElementById('ta-'+id).value.trim().length>=40
+  document.getElementById('btn-g-'+id).disabled=!ok
+  if(ok)document.getElementById('gh-'+id).textContent=''
+}
+function showG(id){
+  document.getElementById('gb-'+id).classList.add('on')
+  document.getElementById('se-'+id).classList.add('on')
+  document.getElementById('btn-g-'+id).disabled=true
+  document.getElementById('btn-g-'+id).textContent='✓ Exibido'
+}
+function rate(id,r){
+  if(dEval[id])return
+  dEval[id]=r;dDone++
+  const d=DD.find(x=>x.id===id)
+  document.querySelectorAll(`#dc-${id} .se-btn`).forEach(b=>b.classList.remove('sel'))
+  document.querySelector(`#dc-${id} .se-btn.se-${r==='ok'?'ok':r==='par'?'par':'er'}`).classList.add('sel')
+  const fb=document.getElementById('df-'+id)
+  fb.className=`dfeedback on f-${r==='ok'?'ok':r==='par'?'par':'er'}`
+  fb.textContent=d.fb[r]
+  document.getElementById('dscore-num').textContent=`${dDone}/8`
+  document.getElementById('dprog').style.width=`${(dDone/8)*100}%`
+}
+</script>
+</body>
+</html>
